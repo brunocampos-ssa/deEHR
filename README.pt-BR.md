@@ -2,13 +2,11 @@
 
 > Uma plataforma open-source de Registro Eletrônico de Saúde na qual **os pacientes realmente são donos dos seus dados de saúde** — construída sobre os padrões **FHIR / SMART**, com autenticidade, consentimento e propriedade dos dados **certificados na blockchain Klever**.
 
-<p>
-  <img alt="Licença: MIT" src="https://img.shields.io/badge/License-MIT-green.svg">
-  <img alt="Status: Planejamento" src="https://img.shields.io/badge/status-planejamento-blue.svg">
-  <img alt="FHIR R4" src="https://img.shields.io/badge/FHIR-R4-orange.svg">
-  <img alt="SMART App Launch 2.x" src="https://img.shields.io/badge/SMART-App%20Launch%202.x-orange.svg">
-  <img alt="Blockchain: Klever" src="https://img.shields.io/badge/blockchain-Klever-purple.svg">
-</p>
+![Licença: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Status: Planejamento](https://img.shields.io/badge/status-planejamento-blue.svg)
+![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange.svg)
+![SMART App Launch 2.x](https://img.shields.io/badge/SMART-App%20Launch%202.x-orange.svg)
+![Blockchain: Klever](https://img.shields.io/badge/blockchain-Klever-purple.svg)
 
 🌐 **Languages / Idiomas:** [English](README.md) · **Português (Brasil)**
 
@@ -60,7 +58,7 @@ Nosso objetivo é uma plataforma open-source de nível produção que seja:
 ## ❓ O Problema
 
 | Dor | Hoje | Com a deEHR |
-|---|---|---|
+| --- | --- | --- |
 | **Propriedade** | O dado pertence à instituição que o capturou. | O paciente é dono do registro; instituições são convidadas. |
 | **Portabilidade** | O histórico fica preso em sistemas proprietários. | Um registro FHIR portável e criptografado acompanha o paciente. |
 | **Consentimento** | Consentimento em papel ou enterrado em termos de uso; difícil auditar ou revogar. | Consentimento é um evento explícito, assinado, revogável e **on-chain**. |
@@ -97,23 +95,23 @@ A deEHR é, até onde sabemos, o primeiro projeto a combinar **autorização SMA
 ## 📚 Padrões e Blocos de Construção
 
 | Bloco de construção | Papel na deEHR | Referência |
-|---|---|---|
+| --- | --- | --- |
 | **HL7 FHIR R4** | Modelo de dados canônico para todos os registros clínicos. | [hl7.org/fhir](https://hl7.org/fhir/) |
 | **SMART App Launch 2.x** | Autorização OAuth2/OIDC para apps e serviços; acesso escopado e de menor privilégio. | [docs.smarthealthit.org](https://docs.smarthealthit.org/) |
 | **SMART Backend Services** | Acesso FHIR servidor-a-servidor (instituição ↔ instituição). | [HL7 SMART](https://hl7.org/fhir/smart-app-launch/backend-services.html) |
 | **OAuth 2.0 / OpenID Connect** | Framework de autenticação subjacente; `id_token`, claim `fhirUser`. | [oauth.net](https://oauth.net/2/) |
-| **WebAuthn / FIDO2 (passkeys)** | Autenticação sem senha, biométrica; chaves de assinatura vinculadas ao dispositivo. | [w3.org/TR/webauthn](https://www.w3.org/TR/webauthn-2/) |
+| **WebAuthn / FIDO2 (passkeys)** | Login sem senha e biométrico na plataforma deEHR (um fator de autenticação off-chain). | [w3.org/TR/webauthn](https://www.w3.org/TR/webauthn-2/) |
 | **W3C DID e Credenciais Verificáveis** | Identidade descentralizada para pacientes, prestadores e instituições. | [w3.org/TR/did-core](https://www.w3.org/TR/did-core/) |
 | **Blockchain Klever (KVM)** | Registries de ancoragem, consentimento, identidade e credenciais via smart contracts Rust/WASM. | [klever.org](https://klever.org/) |
 | **IPFS** | Armazenamento descentralizado para exportações criptografadas do registro, sob posse do paciente. | [ipfs.tech](https://ipfs.tech/) |
 | **RNDS (Brasil)** | Rede Nacional de Dados em Saúde — primeira integração com backbone de governo. | [rnds-guia.saude.gov.br](https://rnds-guia.saude.gov.br/) |
 
-## 🏗️ Arquitetura
+## 🏗 Arquitetura
 
 ### Off-chain vs. On-chain
 
 | Camada | Armazena | Exemplos |
-|---|---|---|
+| --- | --- | --- |
 | **Off-chain** (criptografado) | Todos os dados clínicos | Recursos FHIR, documentos, resultados de exames, imagens |
 | **On-chain** (Klever) | Apenas provas — nunca PHI | Hashes de integridade, concessões/revogações de consentimento, eventos de auditoria de acesso, DIDs, status de credenciais |
 
@@ -159,19 +157,21 @@ flowchart TB
 
 ### Identidade e Gestão de Chaves — "Custódia Progressiva"
 
-É aqui que a deEHR é deliberadamente diferente. **A autocustódia com seed phrases é uma barreira**, não um recurso, para pessoas comuns — e pacientes idosos são um público prioritário. A deEHR usa **account abstraction** para desacoplar *como você faz login* de *o que assina on-chain*:
+É aqui que a deEHR é deliberadamente diferente. **A autocustódia com seed phrases é uma barreira**, não um recurso, para pessoas comuns — e pacientes idosos são um público prioritário. A deEHR desacopla *como o paciente faz login* de *como as transações on-chain são assinadas e pagas*, usando um **modelo de chaves custodial por padrão** sobre o **sistema nativo de permissões de conta** da Klever (contas com múltiplos signatários ponderados e limiares):
 
 | Preocupação | Como a deEHR resolve |
-|---|---|
-| **Login** | Login por e-mail ou social (OIDC) + uma **passkey** (WebAuthn/FIDO2). Desbloqueio biométrico. Sem senhas para esquecer, sem seed phrases para perder. |
-| **Conta on-chain** | Uma **conta smart contract** na Klever (account abstraction), e não um par de chaves bruto. Seu signatário é a passkey vinculada ao dispositivo. |
+| --- | --- |
+| **Login** | Login por e-mail ou social (OIDC) + uma **passkey** (WebAuthn/FIDO2). Desbloqueio biométrico. Sem senhas para esquecer, sem seed phrases para perder. A passkey é um **fator de autenticação off-chain** — ela autentica o paciente na plataforma deEHR; não assina transações Klever diretamente. |
+| **Conta on-chain** | Uma conta Klever padrão cuja chave de assinatura é, por padrão, **custodiada pela plataforma deEHR** (respaldada por HSM) e nunca exposta ao paciente. As permissões de conta nativas da Klever permitem que o conjunto de signatários e o limiar evoluam ao longo do tempo sem mudar o endereço da conta. |
 | **Identidade** | Um DID `did:klever:…` com um DID Document on-chain. O paciente ganha portabilidade e verificabilidade de DID **sem gerenciar nenhuma infraestrutura de DID** ("DID-lite"). |
-| **Recuperação** | **Recuperação social** — guardiões (ex.: um familiar, o médico de atenção primária, a plataforma), limiar de 2 de 3, restauram o acesso em caso de perda do dispositivo. |
+| **Recuperação** | **Recuperação social** construída sobre as permissões nativas de multiassinatura ponderada da Klever — guardiões (ex.: um familiar, o médico de atenção primária, a plataforma) são registrados como signatários em uma permissão de recuperação com limiar M-de-N (ex.: 2 de 3) para restaurar o acesso em caso de perda do dispositivo. |
 | **Chaves de dados** | As chaves de criptografia da PHI também são **respaldadas por guardiões** — perder o celular nunca pode significar perder o registro de saúde. |
-| **Taxas** | Gasless. A plataforma faz o relay das transações de consentimento e paga as taxas (meta-transações). Pacientes nunca tocam em tokens. |
-| **Espectro de custódia** | Padrão = **custódia assistida** (recuperação por guardiões + plataforma, como um banco). Usuários avançados podem optar por **autocustódia total** e exportar para uma carteira Klever real. Progressivo, nunca forçado. |
+| **Taxas** | Pacientes nunca possuem KLV nem pagam gas. A Klever não tem primitiva nativa de transações gasless/meta-transações, então a deEHR opera um **serviço de assinatura e taxas** que submete as transações dos pacientes e cobre as taxas de rede a partir de uma tesouraria da plataforma. |
+| **Espectro de custódia** | Padrão = **custódia assistida** (chave sob posse da plataforma + recuperação por guardiões, como um banco). Usuários avançados podem **assumir o controle progressivamente** — adicionando a chave do próprio dispositivo como signatária, reduzindo a permissão da plataforma e, por fim, exportando para uma carteira Klever sob autocustódia. Progressivo, nunca forçado. |
 
 **Efeito líquido:** entrar na deEHR é como entrar em qualquer aplicativo moderno. A blockchain é *infraestrutura invisível* — até que o paciente queira olhar por baixo do capô.
+
+> **Nota de implementação.** A KVM da Klever não oferece account abstraction no estilo ERC-4337, verificação on-chain de assinatura WebAuthn/passkey (secp256r1), guardiões de conta nativos nem transações gasless nativas. A "Custódia Progressiva" da deEHR é, portanto, uma **construção na camada de aplicação** baseada no sistema nativo de permissões de conta (multiassinatura ponderada) da Klever, somado a um serviço de custódia de chaves e de taxas operado pela plataforma. Isso torna esse serviço crítico para a segurança; seu design é especificado na ADR-0001 (Identidade e Gestão de Chaves), estabelecida na Fase 0.
 
 Instituições (hospitais, operadoras) também recebem DIDs, além de **Credenciais Verificáveis** emitidas por autoridades reconhecidas (ex.: CFM/CRM para registros de médicos, ANS para operadoras, CNES para estabelecimentos). São essas credenciais que permitem ao servidor de autorização distinguir um hospital realmente credenciado de um impostor.
 
@@ -180,8 +180,8 @@ Instituições (hospitais, operadoras) também recebem DIDs, além de **Credenci
 Os smart contracts da Klever são escritos em **Rust** e compilados para **WebAssembly** para a **KVM (Klever Virtual Machine)**. A camada on-chain da deEHR é um conjunto de registries:
 
 | Registry | Responsabilidade |
-|---|---|
-| **Registry de Identidade / DID** | DID Documents, rotação de chaves, conjuntos de guardiões, contas de account abstraction. |
+| --- | --- |
+| **Registry de Identidade / DID** | DID Documents, histórico de rotação de chaves, conjuntos de signatários de guardião/recuperação. |
 | **Registry de Credenciais** | **Status** de emissão e revogação de Credenciais Verificáveis (apenas hashes — nunca o conteúdo da credencial). |
 | **Registry de Consentimento** | Concessões de consentimento assinadas pelo paciente: DID do destinatário, conjunto de escopos, filtro de recursos, finalidade de uso, validade. Cada concessão/revogação é um evento. **Fonte da verdade para autorização.** |
 | **Registry de Ancoragem e Auditoria** | Hashes de integridade dos bundles FHIR criptografados + CIDs de IPFS; log à prova de adulteração de todo evento de acesso a dados. |
@@ -204,8 +204,8 @@ sequenceDiagram
   AS->>Chain: Consulta consentimento ativo (paciente -> destinatário, escopos)
   alt Sem consentimento / insuficiente
     AS->>Pt: Exibe tela de consentimento
-    Pt->>AS: Aprova com biometria (assinatura da passkey)
-    AS->>Chain: Faz relay da transação de consentimento assinada (gasless)
+    Pt->>AS: Aprova o consentimento (passkey / biometria)
+    AS->>Chain: Submete a tx de consentimento do paciente (assinatura custodial, taxas pagas pela plataforma)
   end
   AS-->>App: Token OAuth2 (escopos = solicitados E consentimento on-chain)
   App->>GW: Requisição FHIR + access token
@@ -222,7 +222,7 @@ sequenceDiagram
 ## 👥 Atores e Casos de Uso
 
 | Ator | Papel | Fluxos principais |
-|---|---|---|
+| --- | --- | --- |
 | **Paciente** | Dono e custodiante do registro. | Onboarding, ver o histórico completo, conceder/revogar consentimento, exportar o registro, designar guardiões de recuperação. |
 | **Hospital / Prestador** | Captura e lê dados clínicos. | Cadastrar-se (com credenciais), escrever recursos FHIR, solicitar acesso condicionado a consentimento, contribuir para o registro longitudinal do paciente. |
 | **Operadora** | Cobertura, sinistros e benefícios. | Cadastrar-se, solicitar acesso de divulgação mínima para uma finalidade específica, processar `Claim` / `Coverage` / `ExplanationOfBenefit` FHIR. |
@@ -238,12 +238,12 @@ A **Rede Nacional de Dados em Saúde (RNDS)** é o primeiro backbone de governo 
 
 O design do conector mantém as questões específicas da RNDS (certificados, mapeamento de perfis, o fluxo de autenticação nacional) fora do núcleo da plataforma, de modo que backbones nacionais adicionais possam ser acrescentados depois como conectores irmãos.
 
-## 🗺️ Roadmap
+## 🗺 Roadmap
 
 O objetivo é provar o **ciclo completo** — Paciente ⇄ Hospital ⇄ Operadora ⇄ RNDS — entregue em fases, mas arquitetado de ponta a ponta desde o primeiro dia.
 
 | Fase | Tema | Destaques |
-|---|---|---|
+| --- | --- | --- |
 | **0 — Fundações** | Repositório e design | Governança, ADRs, modelagem de ameaças, seleção de perfis FHIR, esqueletos de contrato na devnet Klever, CI/CD, ferramental de segurança. |
 | **1 — Núcleo do Paciente** | O paciente é dono do dado | Identidade de custódia progressiva, onboarding do paciente, PHR, FHIR Gateway, registries de Ancoragem + Consentimento, Servidor de Autorização SMART. |
 | **2 — Hospital** | Integração de prestador | Onboarding institucional + Credenciais Verificáveis, hospital escreve dados FHIR, acesso de prestador condicionado a consentimento, trilha de auditoria. |
@@ -253,10 +253,10 @@ O objetivo é provar o **ciclo completo** — Paciente ⇄ Hospital ⇄ Operador
 
 > Marcos detalhados e versionados viverão em GitHub Issues / Projects assim que o repositório for público.
 
-## 🛠️ Stack Tecnológica
+## 🛠 Stack Tecnológica
 
 | Área | Escolha | Notas |
-|---|---|---|
+| --- | --- | --- |
 | **Serviços de backend** | **Go** | FHIR Gateway, Servidor de Autorização SMART, Conector RNDS, relayer de consentimento. Alinhado ao ecossistema do nó Klever; deploys de binário único. |
 | **Smart contracts** | **Rust → WASM** | Compilados para a KVM Klever. |
 | **Servidor FHIR** | Plugável (ex.: HAPI FHIR) | FHIR R4; roda como componente de infraestrutura por trás do Gateway. |
@@ -270,7 +270,7 @@ O objetivo é provar o **ciclo completo** — Paciente ⇄ Hospital ⇄ Operador
 
 Layout planejado do monorepo (sujeito a refinamento na Fase 0):
 
-```
+```text
 deEHR/
 ├── README.md                  # Documento canônico (inglês)
 ├── README.pt-BR.md            # Esta versão em Português do Brasil
@@ -287,7 +287,7 @@ deEHR/
 │   ├── auth-server/           # Servidor de autorização SMART / OIDC
 │   ├── fhir-gateway/          # Facade FHIR + ancoragem
 │   ├── rnds-connector/        # Integração com a RNDS
-│   └── consent-relayer/       # Relayer de transações gasless
+│   └── consent-relayer/       # Serviço de assinatura e taxas da plataforma
 ├── apps/                      # Aplicações para usuário final (fases posteriores)
 │   ├── patient-web/
 │   ├── patient-mobile/
