@@ -1,0 +1,48 @@
+# --- Go ---
+/bin/
+*.exe
+*.test
+*.out
+vendor/
+go.work.sum
+
+# --- Rust / WASM smart contracts ---
+target/
+**/*.rs.bk
+Cargo.lock.orig
+*.wasm
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+build/
+.next/
+*.tsbuildinfo
+coverage/
+
+# --- Secrets & environment ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# --- IDE & OS ---
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# --- Logs & temp ---
+*.log
+tmp/
+.cache/
+
+# --- Local infra state ---
+*.tfstate
+*.tfstate.*
+.terraform/
