@@ -7,7 +7,7 @@ body:
     id: problem
     attributes:
       label: Problem / motivation
-      description: What user need, gap or pain does this address?
+      description: What user need, gap, or pain does this address?
     validations:
       required: true
   - type: textarea

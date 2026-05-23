@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         > ⚠️ **Security vulnerabilities must NOT be reported in public issues.**
-        > See [SECURITY.md](../SECURITY.md) for the private disclosure process.
+        > See [SECURITY.md](/SECURITY.md) for the private disclosure process.
   - type: textarea
     id: summary
     attributes:

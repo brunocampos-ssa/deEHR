@@ -24,7 +24,7 @@ Closes #
 - [ ] Tests added/updated where behavior changed
 - [ ] Documentation updated (READMEs, ADRs, comments)
 - [ ] CI checks passing locally (lint, security)
-- [ ] **Pre-PR security audit completed** (see [SECURITY.md](../SECURITY.md))
+- [ ] **Pre-PR security audit completed** (see [SECURITY.md](/SECURITY.md))
 - [ ] **GitHub Copilot review received on the latest commit**
 - [ ] **All valid Copilot review comments resolved**
 
