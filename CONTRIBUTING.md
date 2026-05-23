@@ -50,13 +50,32 @@ The monorepo layout is being established during Phase 0 — see the
 Detailed, per-component setup instructions will be added to each module's
 README as it lands.
 
+## Branching and release model
+
+deEHR uses **trunk-based development**:
+
+- `main` is the **trunk** — the single long-lived branch. Every change lands
+  here via a pull request, squash- or rebase-merged. Linear history is
+  enforced.
+- There is **no long-lived `develop` or `release/*` branch.** Environments are
+  decoupled from branches.
+- **Sandbox / staging** auto-deploys from the latest `main`.
+- **Production** deploys from **tagged releases** (`v0.1.0`, `v1.0.0`, …),
+  published as GitHub Releases following Semantic Versioning.
+- Reverts are commits, not branch operations.
+
+Rationale and trade-offs are recorded in
+[ADR-0003](docs/architecture/adr-0003-branching-and-release-model.md).
+
 ## Branching and commits
 
 - Branch from `main`. Name branches descriptively: `feat/consent-registry`,
-  `fix/auth-token-expiry`, `docs/adr-0003`.
+  `fix/auth-token-expiry`, `docs/adr-0004`, `chore/ci-lint`.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/):
   `type(scope): summary`. Common types: `feat`, `fix`, `docs`, `refactor`,
   `test`, `chore`, `ci`.
+- Commits must be **signed** (`commit.gpgsign = true`) — the ruleset enforces
+  this on `main`.
 - Keep commits focused and the history readable.
 
 ## Pull request process
