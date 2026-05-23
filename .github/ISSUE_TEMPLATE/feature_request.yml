@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest a feature, enhancement, or scope change for deEHR
+title: "feat: <short title>"
+labels: ["type:feat"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What user need, gap, or pain does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed solution
+      description: The feature itself — scope, constraints, sketches.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches and why this one is preferred.
+  - type: textarea
+    id: dod
+    attributes:
+      label: Definition of done
+      description: A short bullet list — what does "delivered" look like?
+  - type: input
+    id: phase
+    attributes:
+      label: Phase / milestone
+      placeholder: e.g. Phase 1 — Patient Core
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, references, related issues or ADRs.

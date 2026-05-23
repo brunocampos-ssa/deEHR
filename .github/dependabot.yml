@@ -1,0 +1,25 @@
+version: 2
+
+updates:
+  # GitHub Actions used in this repository's workflows.
+  # Cargo and Go ecosystems will be added in their respective phases
+  # once contracts/ and services/ are scaffolded.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 10
+    labels:
+      - "type:chore"
+      - "area:ci"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      actions-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"

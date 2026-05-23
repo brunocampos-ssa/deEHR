@@ -1,0 +1,60 @@
+name: Bug report
+description: Report a non-security bug in deEHR
+title: "fix: <short title>"
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > ⚠️ **Security vulnerabilities must NOT be reported in public issues.**
+        > See [SECURITY.md](/SECURITY.md) for the private disclosure process.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: deEHR version / commit
+      placeholder: e.g. main@6aea3b1
+  - type: input
+    id: component
+    attributes:
+      label: Component
+      placeholder: e.g. auth-server, fhir-gateway, consent-registry
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: |
+        Redact any PHI before sharing. Use synthetic data only — no real
+        patient information.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
