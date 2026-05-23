@@ -1,0 +1,16 @@
+# CODEOWNERS for deEHR
+#
+# Owners listed here are automatically requested for review on PRs that
+# touch matching paths. Ownership will be refined as the team grows.
+
+# Default owner for everything not matched by a more specific rule.
+*                              @brunocampos-ssa
+
+# Security-critical and governance files always require maintainer review.
+/SECURITY.md                   @brunocampos-ssa
+/CODE_OF_CONDUCT.md            @brunocampos-ssa
+/CONTRIBUTING.md               @brunocampos-ssa
+/docs/security/                @brunocampos-ssa
+/docs/architecture/            @brunocampos-ssa
+/.github/                      @brunocampos-ssa
+/.markdownlint.json            @brunocampos-ssa

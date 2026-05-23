@@ -93,6 +93,19 @@ Rationale and trade-offs are recorded in
 A maintainer will review for correctness, security, standards compliance and
 accessibility.
 
+## Code review
+
+All PRs receive an automated review from **GitHub Copilot** on every push.
+A PR may not be merged until:
+
+- Copilot has reviewed the latest commit, **and**
+- any valid Copilot review comments have been resolved, **and**
+- a maintainer has approved the PR.
+
+Merges to `main` use **squash** or **rebase** only — merge commits are blocked
+by the ruleset to keep history linear (see
+[ADR-0003](docs/architecture/adr-0003-branching-and-release-model.md)).
+
 ## The hard invariants
 
 These are non-negotiable and are enforced in review:
