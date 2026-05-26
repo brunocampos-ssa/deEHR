@@ -26,11 +26,7 @@ one is marked `Superseded by ADR-XXXX`.
 | [0001](adr-0001-identity-and-key-management.md) | Identity & Key Management — Progressive Custody | Accepted |
 | [0002](adr-0002-on-chain-registry-design.md) | On-chain Registry Design | Proposed |
 | [0003](adr-0003-branching-and-release-model.md) | Branching & Release Model — Trunk-based Development | Accepted |
-
-### Planned
-
-- **ADR-0004** — `did:klever` DID method specification (no standard method
-  exists; deEHR will define one).
+| [0004](adr-0004-did-klever-method.md) | `did:klever` DID Method — Hybrid Classical / Post-Quantum | Proposed |
 
 ## Process
 
