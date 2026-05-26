@@ -66,7 +66,7 @@ We adopt an identity and key-management model called **Progressive Custody**.
 
 5. **Identity.** Each patient has a `did:klever` DID with an on-chain DID
    Document. The `did:klever` method itself is specified separately in
-   [ADR-0004](adr-0004-did-klever-method.md).
+   **ADR-0004** (planned).
 
 6. **Progressive custody spectrum.** The default is **assisted custody**
    (platform-held key + guardian recovery). A patient may progressively take
@@ -120,6 +120,7 @@ We adopt an identity and key-management model called **Progressive Custody**.
 
 ## Open questions
 
+- **ADR-0004** must specify the `did:klever` DID method.
 - HSM / KMS selection for the custody service.
 - Treasury funding model and concrete anti-abuse quotas / rate limits.
 - Whether to build on Klever-native custody infrastructure (e.g. KleverSafe)
@@ -137,5 +138,15 @@ We adopt an identity and key-management model called **Progressive Custody**.
   transactions; native weighted-multisig account permissions and KDA fee pools
   are available.
 - [ADR-0002](adr-0002-on-chain-registry-design.md) — On-chain Registry Design.
-- [ADR-0004](adr-0004-did-klever-method.md) — `did:klever` DID Method.
 - W3C Decentralized Identifiers (DID) Core; W3C WebAuthn / FIDO2.
+
+## Addenda
+
+### 2026-05-26 — ADR-0004 published
+
+[ADR-0004](adr-0004-did-klever-method.md) — `did:klever` DID Method — has
+been published as **Proposed**, fulfilling the planned reference in §5 of
+the *Decision* above and resolving the corresponding entry in *Open
+questions*. ADR-0001's decision is unchanged; this addendum is recorded per
+the repository's append-only ADR policy
+(see [docs/architecture/README.md](README.md) — *What is an ADR?*).

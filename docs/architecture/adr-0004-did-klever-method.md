@@ -63,6 +63,17 @@ This satisfies the W3C DID Core ABNF: the method name is `klever`, and the
 method-specific identifier `<network>:<bech32>` uses only characters in the
 `idchar` set.
 
+### 1.5. Signer key-type policy
+
+The Klever KVM verifies `ed25519`, `secp256k1`, and BLS signatures natively.
+For **deEHR-managed accounts**, `did:klever` uses **Ed25519 signers
+exclusively** — for alignment with the Klever wallet and SDK defaults, a
+uniform `Multikey` shape per classical verification method, a single
+KMS / HSM key type in custody, and a single rotation primitive across the
+progressive-custody spectrum. This constraint is a deEHR policy, not a
+restriction of the `did:klever` method itself; other implementers may use
+`secp256k1` or BLS signers within the same method.
+
 ### 2. Resolution path
 
 A resolver — implemented as a deEHR universal-resolver driver — performs:
@@ -70,8 +81,9 @@ A resolver — implemented as a deEHR universal-resolver driver — performs:
 1. Parse the DID into `(network, address)`.
 2. Connect to the configured Klever node URL for the network.
 3. Read the account's permission set (native, fee-free read). Each registered
-   signer with its weight, threshold, and operation bitmask produces one
-   classical (Ed25519) verification method.
+   signer — its weight, threshold, and operation bitmask — produces one
+   classical verification method. Under the §1.5 policy, deEHR-managed
+   accounts produce `Multikey` Ed25519 entries.
 4. Call `Identity.resolveDid(address)` on the Identity Registry contract.
    This returns the PQ verification-method commitments, key-agreement keys,
    service endpoints, and the deactivation flag.
@@ -187,10 +199,12 @@ distribution channel.
   multisig recovery permission per ADR-0001.
 - **Update — service endpoints.** `Identity.setServices(services)`.
   Holder-controlled.
-- **Deactivate.** `Identity.deactivate()` sets a deactivation flag.
-  Resolution then returns a tombstone DID Document with
-  `"deactivated": true` and an empty `verificationMethod` array, per W3C DID
-  Core §7.2.
+- **Deactivate.** `Identity.deactivate()` sets a deactivation flag on the
+  Identity Registry record. Subsequent resolutions return a minimal
+  tombstone DID Document together with DID Document metadata in which
+  `deactivated` is set to `true`. Per W3C DID Core, the deactivation signal
+  belongs in `didDocumentMetadata.deactivated`, not as a top-level property
+  of the DID Document itself.
 
 Every state-changing operation emits a structured event under the ADR-0002
 event model so the off-chain indexer can reconstruct history.
