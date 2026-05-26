@@ -139,3 +139,14 @@ We adopt an identity and key-management model called **Progressive Custody**.
   are available.
 - [ADR-0002](adr-0002-on-chain-registry-design.md) — On-chain Registry Design.
 - W3C Decentralized Identifiers (DID) Core; W3C WebAuthn / FIDO2.
+
+## Addenda
+
+### 2026-05-26 — ADR-0004 published
+
+[ADR-0004](adr-0004-did-klever-method.md) — `did:klever` DID Method — has
+been published as **Proposed**, fulfilling the planned reference in §5 of
+the *Decision* above and resolving the corresponding entry in *Open
+questions*. ADR-0001's decision is unchanged; this addendum is recorded per
+the repository's append-only ADR policy
+(see [docs/architecture/README.md](README.md) — *What is an ADR?*).
