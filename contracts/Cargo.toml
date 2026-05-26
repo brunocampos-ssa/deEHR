@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = [
+    "identity-registry",
+    "credential-registry",
+    "consent-registry",
+    "anchor-registry",
+]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+license = "MIT"
+authors = ["deEHR contributors"]
+repository = "https://github.com/brunocampos-ssa/deEHR"
+publish = false
+
+# Optimized for WebAssembly contract size; effective once the SDK is wired
+# and crates switch to `crate-type = ["cdylib"]`.
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
