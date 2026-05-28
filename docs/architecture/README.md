@@ -1,5 +1,7 @@
 # Architecture Decision Records
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](README.pt-BR.md)
+
 This directory holds the Architecture Decision Records (ADRs) for deEHR.
 
 ## What is an ADR?

@@ -1,5 +1,7 @@
 # ADR-0005: FHIR Profile Selection — R4 baseline, RNDS-compatible, SMART v2
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](adr-0005-fhir-profile-selection.pt-BR.md)
+
 - **Status:** Accepted
 - **Date:** 2026-05-28
 - **Deciders:** deEHR maintainers

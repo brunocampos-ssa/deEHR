@@ -31,6 +31,7 @@
 - [Actors & Use Cases](#-actors--use-cases)
 - [RNDS & Government Integration](#-rnds--government-integration)
 - [Roadmap](#-roadmap)
+- [How We Manage Work](#-how-we-manage-work)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [Security & Compliance](#-security--compliance)
@@ -249,7 +250,26 @@ The goal is to prove the **full cycle** — Patient ⇄ Hospital ⇄ Insurer ⇄
 | **4 — RNDS** | Government backbone | RNDS Connector, ICP-Brasil certificates, RNDS profile mapping, sandbox homologation. |
 | **5 — Hardening & Launch** | Production | Full security audit + penetration test, performance tuning, Klever mainnet, pilot deployment. |
 
-> Detailed, versioned milestones will live in GitHub Issues / Projects once the repository is public.
+## 🧭 How We Manage Work
+
+Work on deEHR is tracked publicly on GitHub:
+
+- **Issues** are the atomic work unit — every planned, in-progress, or
+  deferred item lives as an issue.
+- **Milestones** group issues by roadmap phase. See the
+  [milestones list](https://github.com/brunocampos-ssa/deEHR/milestones),
+  starting with
+  [Phase 0 — Foundations](https://github.com/brunocampos-ssa/deEHR/milestone/1)
+  through Phase 5.
+- A public **Projects v2 "deEHR Roadmap" board** (in setup — see
+  [#5](https://github.com/brunocampos-ssa/deEHR/issues/5)) will offer Board
+  and Roadmap timeline views over the same issues once enabled.
+- **Architecture decisions** are captured as append-only **ADRs** in
+  [`docs/architecture/`](docs/architecture/).
+
+To contribute or propose new work, open an issue first using one of the
+[issue templates](https://github.com/brunocampos-ssa/deEHR/issues/new/choose)
+so we can discuss before code lands — see [Contributing](#-contributing).
 
 ## 🛠 Tech Stack
 

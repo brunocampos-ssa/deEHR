@@ -1,5 +1,7 @@
 # ADR-0001: Identity & Key Management — Progressive Custody
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](adr-0001-identity-and-key-management.pt-BR.md)
+
 - **Status:** Accepted
 - **Date:** 2026-05-22
 - **Deciders:** deEHR maintainers

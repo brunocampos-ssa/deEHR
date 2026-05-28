@@ -1,5 +1,7 @@
 # Contributing to deEHR
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](CONTRIBUTING.pt-BR.md)
+
 Thank you for your interest in deEHR — an open-source, patient-owned
 Electronic Health Record platform built on FHIR / SMART standards with
 Klever blockchain anchoring. Contributions of all kinds are welcome.

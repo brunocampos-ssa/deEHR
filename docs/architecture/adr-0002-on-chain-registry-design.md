@@ -1,5 +1,7 @@
 # ADR-0002: On-chain Registry Design
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](adr-0002-on-chain-registry-design.pt-BR.md)
+
 - **Status:** Accepted
 - **Date:** 2026-05-22
 - **Deciders:** deEHR maintainers
