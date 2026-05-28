@@ -1,5 +1,7 @@
 # ADR-0004: did:klever DID Method — Hybrid Classical / Post-Quantum
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](adr-0004-did-klever-method.pt-BR.md)
+
 - **Status:** Proposed
 - **Date:** 2026-05-26
 - **Deciders:** deEHR maintainers

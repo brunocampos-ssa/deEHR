@@ -1,5 +1,7 @@
 # Code of Conduct
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](CODE_OF_CONDUCT.pt-BR.md)
+
 ## Our adopted standard
 
 The deEHR project adopts the **Contributor Covenant, version 2.1** as its Code

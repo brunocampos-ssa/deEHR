@@ -1,5 +1,7 @@
 # deEHR Threat Model
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](threat-model.pt-BR.md)
+
 - **Status:** Living document — initial draft (Phase 0)
 - **Date:** 2026-05-22
 - **Owner:** deEHR maintainers

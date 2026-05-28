@@ -1,5 +1,7 @@
 # Security Policy
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](SECURITY.pt-BR.md)
+
 deEHR is an open-source, patient-owned Electronic Health Record platform. It
 handles **sensitive personal health data**, so security is treated as a release
 gate on every change — not a phase.

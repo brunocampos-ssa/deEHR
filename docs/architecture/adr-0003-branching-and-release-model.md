@@ -1,5 +1,7 @@
 # ADR-0003: Branching and Release Model — Trunk-based Development
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](adr-0003-branching-and-release-model.pt-BR.md)
+
 - **Status:** Accepted
 - **Date:** 2026-05-23
 - **Deciders:** deEHR maintainers

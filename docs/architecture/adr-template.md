@@ -1,5 +1,7 @@
 # ADR-NNNN: {short title}
 
+🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](adr-template.pt-BR.md)
+
 - **Status:** Proposed | Accepted | Deprecated | Superseded by ADR-XXXX
 - **Date:** YYYY-MM-DD
 - **Deciders:** {names or roles}
