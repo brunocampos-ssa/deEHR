@@ -216,10 +216,9 @@ to other ADRs). ADR-0002 will be **amended via an Addenda section** if any
 answer materially contradicts the assumptions above, consistent with the
 repository's append-only ADR policy.
 
-- **Q6 — Coded value sets** for scope and purpose-of-use. Depends on FHIR
-  profile selection ([#6](https://github.com/brunocampos-ssa/deEHR/issues/6)).
-  Once #6 resolves, ADR-0002 will be amended to bind the chosen SMART scope
-  codes and RNDS coded sets.
+- ~~**Q6 — Coded value sets** for scope and purpose-of-use~~ — **Resolved**
+  2026-05-28 by [ADR-0005](adr-0005-fhir-profile-selection.md). See the
+  *Addenda* entry below for the binding summary.
 
 - **Klever-team confirmations needed.** The 2026-05-27 research left several
   behavioural details that the SDK source and public docs do not
@@ -284,3 +283,29 @@ substantive open questions closed, the ADR is promoted from **Proposed** to
 **Accepted** per this entry. Future amendments will be recorded as
 additional entries in this section, per the repository's append-only ADR
 policy.
+
+### 2026-05-28 — Q6 resolved (coded value sets)
+
+[ADR-0005](adr-0005-fhir-profile-selection.md) — FHIR Profile Selection —
+has been published as **Accepted**, resolving the remaining Q6 open
+question on coded value sets for SMART scopes and purpose-of-use:
+
+- **SMART scopes** — deEHR adopts SMART App Launch 2.0 v2 syntax with a
+  `v1` MVP scope vocabulary (20 scopes) published as a signed manifest at
+  `https://deehr.org/fhir/scopes/v1.json`. The Consent Registry encodes
+  each granted scope as a fixed-shape tuple
+  `(deehr_scopes_version: u16, template_code: u16, param_hash: bytes16)` —
+  20 bytes on-chain, reversible via the manifest. See ADR-0005 §§5-6.
+- **Purpose-of-use** — deEHR binds to
+  `http://terminology.hl7.org/CodeSystem/v3-ActReason` (HL7 v3 ActReason),
+  with the on-chain value drawn from the deEHR `v1` accept-list (12 codes
+  from the [`v3-PurposeOfUse`](https://hl7.org/fhir/R4/valueset-v3-PurposeOfUse.html)
+  value set: `TREAT`, `ETREAT`, `ERTREAT`, `HRESCH`, `CLINTRCH`, `HPAYMT`,
+  `COVERAGE`, `HOPERAT`, `PUBHLTH`, `PATRQT`, `COC`, `HLEGAL`). See
+  ADR-0005 §7.
+
+With Q6 resolved, ADR-0002's *Decision* §2 (no-PHI invariant — "coded
+scope and purpose-of-use identifiers, never free text") now has concrete,
+HL7-canonical code-system URIs to reference. The 10-item Klever
+developer-team confirmation list under *Open questions* remains the
+ADR's only outstanding item.
