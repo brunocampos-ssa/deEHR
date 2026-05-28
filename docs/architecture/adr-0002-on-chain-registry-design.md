@@ -2,7 +2,6 @@
 
 - **Status:** Accepted
 - **Date:** 2026-05-22
-- **Last updated:** 2026-05-27 (open questions Q1-Q5 resolved; promoted to Accepted)
 - **Deciders:** deEHR maintainers
 
 ## Context
@@ -63,10 +62,13 @@ items are tracked below.
      single `ManagedBuffer`. The macro rejects multiple non-indexed args.
    - Topic 0 is the event name (literal bytes). Topics 1..N are the
      `#[indexed]` arguments in declaration order. **Addresses in topics are
-     raw 32-byte buffers, not bech32.** The off-chain indexer must hex-encode
-     addresses (strip the `klv1` HRP) before matching event topics. The
-     emitting contract address — separately surfaced as `Logs.Address` on the
-     proxy — remains bech32.
+     raw 32-byte buffers, not bech32.** To match a `klv1…` address against
+     `topics[1..]`, the off-chain indexer must **bech32-decode** the address
+     to its raw 32-byte payload (validating the checksum and converting from
+     5-bit bech32 groups back to 8-bit bytes), **then hex-encode** those raw
+     bytes for comparison. Stripping the `klv1` prefix as a string operation
+     does **not** yield the raw bytes. The emitting contract address —
+     separately surfaced as `Logs.Address` on the proxy — remains bech32.
    - To keep events predictable under as-yet-undocumented VM limits (see
      *Open questions* — Klever-team confirmations), deEHR caps each event at
      **≤ 4 topics** and uses a single struct payload for any composite data.
@@ -265,3 +267,20 @@ repository's append-only ADR policy.
   `api-and-sdk`).
 - `klever-io/klever-vm-sdk-rs` — <https://github.com/klever-io/klever-vm-sdk-rs>.
 - `klever-io/klever-go` — <https://github.com/klever-io/klever-go>.
+
+## Addenda
+
+### 2026-05-27 — Open questions Q1-Q5 resolved; promoted to Accepted
+
+ADR-0002 originally landed as **Proposed** pending six open questions about
+Klever KVM behaviour. Source-cited research on 2026-05-27 against
+`klever-sc 0.45.1`, `klever-go`, the official docs, and mainnet transaction
+observation resolved Q1-Q5; the resolutions are reflected inline in §§1, 7,
+9, 10 of the *Decision* and summarised in *Resolved questions*. **Q6**
+(coded value sets) remains open and is tracked under
+[#6](https://github.com/brunocampos-ssa/deEHR/issues/6). The 10-item Klever
+developer-team confirmation list is recorded in *Open questions*. With the
+substantive open questions closed, the ADR is promoted from **Proposed** to
+**Accepted** per this entry. Future amendments will be recorded as
+additional entries in this section, per the repository's append-only ADR
+policy.
