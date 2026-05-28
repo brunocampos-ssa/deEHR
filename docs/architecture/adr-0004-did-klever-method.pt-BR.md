@@ -276,7 +276,7 @@ necessidade de migração de DID.
 
 ## Consequências
 
-### Positivas
+### Aspectos positivos
 
 - Os dados de paciente de longa duração são resistentes a ataques
   quânticos desde o primeiro dia. A ameaça realista de *harvest-now,
@@ -291,7 +291,7 @@ necessidade de migração de DID.
 - A footprint on-chain permanece em commitments de 32 bytes,
   independentemente do tamanho do esquema PQ.
 
-### Negativas / riscos
+### Aspectos negativos / riscos
 
 - **Superfície de custódia confiável maior.** As chaves privadas PQ
   vivem no mesmo escopo de custódia das clássicas; o cenário de

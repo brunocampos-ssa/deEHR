@@ -13,12 +13,12 @@ todos os tipos são bem-vindas.
 
 > **Status do projeto:** planejamento inicial / Fase 0 (Fundações). A
 > arquitetura ainda está sendo estabelecida e as coisas vão se mover. O
-> [README](README.md) é o documento âncora do projeto.
+> [README](README.pt-BR.md) é o documento âncora do projeto.
 
 ## Código de Conduta
 
 Este projeto e todos os que dele participam são regidos pelo
-[Código de Conduta](CODE_OF_CONDUCT.md). Ao participar, espera-se que você o
+[Código de Conduta](CODE_OF_CONDUCT.pt-BR.md). Ao participar, espera-se que você o
 respeite. Por favor, reporte comportamento inaceitável para
 <brunocampos.ssa@gmail.com>.
 
@@ -49,7 +49,7 @@ exigir um Registro de Decisão Arquitetural (ADR) sob `docs/architecture/`.
 ## Setup de desenvolvimento
 
 O layout do monorepo está sendo estabelecido durante a Fase 0 — veja a seção
-*Project Structure* do [README](README.md). Em alto nível:
+*Project Structure* do [README](README.pt-BR.md). Em alto nível:
 
 - **Serviços de backend** — Go (versão do toolchain fixada em `go.mod` assim
   que for criado).
@@ -75,7 +75,7 @@ A deEHR usa **trunk-based development**:
 - Reversões são commits, não operações de branch.
 
 A justificativa e os trade-offs estão registrados na
-[ADR-0003](docs/architecture/adr-0003-branching-and-release-model.md).
+[ADR-0003](docs/architecture/adr-0003-branching-and-release-model.pt-BR.md).
 
 ## Branching e commits
 
@@ -99,7 +99,7 @@ A justificativa e os trade-offs estão registrados na
 4. Atualize a documentação afetada pela mudança, incluindo ADRs quando
    relevante.
 5. **Uma auditoria de segurança é obrigatória antes de cada pull request** —
-   veja [SECURITY.md](SECURITY.md). Mudanças que tocam em contratos Rust/WASM
+   veja [SECURITY.pt-BR.md](SECURITY.pt-BR.md). Mudanças que tocam em contratos Rust/WASM
    exigem, adicionalmente, uma auditoria de smart contract.
 6. Preencha o template de PR, vincule a issue relacionada e peça revisão.
 
@@ -117,7 +117,7 @@ push. Um PR não pode ter merge até que:
 
 Merges para `main` usam apenas **squash** ou **rebase** — merge commits são
 bloqueados pelo ruleset para manter o histórico linear (veja a
-[ADR-0003](docs/architecture/adr-0003-branching-and-release-model.md)).
+[ADR-0003](docs/architecture/adr-0003-branching-and-release-model.pt-BR.md)).
 
 ## Os invariantes rígidos
 
@@ -131,7 +131,7 @@ Estes são não-negociáveis e são reforçados em revisão:
 - **Nenhuma PHI real em lugar algum do repositório.** Testes, fixtures, seed
   data e exemplos devem usar **somente dados sintéticos**. Nunca faça commit
   de dados reais de pacientes, credenciais, secrets ou tokens.
-- **Segurança é um gate, não uma fase.** Veja [SECURITY.md](SECURITY.md).
+- **Segurança é um gate, não uma fase.** Veja [SECURITY.pt-BR.md](SECURITY.pt-BR.md).
 
 ## Padrões de código
 
@@ -156,7 +156,7 @@ atualize você mesmo(a) se puder.
 ## Segurança
 
 Para reportar uma vulnerabilidade, **não abra uma issue pública** — siga o
-processo descrito em [SECURITY.md](SECURITY.md).
+processo descrito em [SECURITY.pt-BR.md](SECURITY.pt-BR.md).
 
 ## Licença
 
