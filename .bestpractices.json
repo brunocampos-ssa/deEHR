@@ -76,7 +76,7 @@
   "test_most_status": "N/A",
   "test_most_justification": "No test suite yet (Phase 0).",
   "test_continuous_integration_status": "N/A",
-  "test_continuous_integration_justification": "No test suite yet (Phase 0). CI is already configured for documentation/security: .github/workflows/lint.yml (markdownlint, actionlint) and security.yml (gitleaks, Trivy fs, OpenSSF Scorecard, CodeQL). Test CI will be added when production code lands.",
+  "test_continuous_integration_justification": "No test suite yet (Phase 0). CI is already configured for documentation/security: .github/workflows/lint.yml (markdownlint, actionlint) and security.yml (gitleaks, Trivy fs, OpenSSF Scorecard); CodeQL runs separately via GitHub's default setup, wired into the main-branch ruleset. Test CI will be added when production code lands.",
   "test_policy_status": "Met",
   "test_policy_justification": "CONTRIBUTING.md states: 'Add or update tests for any behaviour change.' Tests are required for code PRs.",
   "tests_are_added_status": "N/A",
