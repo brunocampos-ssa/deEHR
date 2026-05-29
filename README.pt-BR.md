@@ -3,6 +3,7 @@
 > Uma plataforma open-source de Registro Eletrônico de Saúde na qual **os pacientes realmente são donos dos seus dados de saúde** — construída sobre os padrões **FHIR / SMART**, com autenticidade, consentimento e propriedade dos dados **certificados na blockchain Klever**.
 
 ![Licença: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+[![OpenSSF Baseline](https://www.bestpractices.dev/projects/13023/baseline)](https://www.bestpractices.dev/projects/13023)
 ![Status: Planejamento](https://img.shields.io/badge/status-planejamento-blue.svg)
 ![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange.svg)
 ![SMART App Launch 2.x](https://img.shields.io/badge/SMART-App%20Launch%202.x-orange.svg)
