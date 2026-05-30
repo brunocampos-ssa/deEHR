@@ -73,7 +73,7 @@ The architecture follows a principle confirmed by both academic research and the
 > **Protected Health Information (PHI) never goes on the blockchain.**
 > Encrypted **FHIR** resources are stored **off-chain**. The blockchain stores only **proofs**: integrity hashes, consent receipts, access events and identity/credential records.
 
-This matches the guidance gathered from an Amil CTO:
+This matches guidance gathered from a CTO in the Brazilian insurance market:
 
 1. *"Anchor and validate the data on-chain, and store it off-chain already in FHIR format."* → **Anchor Registry** + off-chain FHIR storage.
 2. *"We need a study of how to anchor identity and chain validation with SMART, to pass validated scopes to the API."* → The **SMART ↔ Blockchain Bridge** (consent-gated token issuance).
