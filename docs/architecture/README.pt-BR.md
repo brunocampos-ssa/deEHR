@@ -34,6 +34,7 @@ e o antigo é marcado como `Substituído por ADR-XXXX`.
 | [0003](adr-0003-branching-and-release-model.pt-BR.md) | Modelo de Branching e Release — Trunk-based Development | Aceito |
 | [0004](adr-0004-did-klever-method.pt-BR.md) | Método DID `did:klever` — Híbrido Clássico / Pós-Quântico | Proposto |
 | [0005](adr-0005-fhir-profile-selection.pt-BR.md) | Seleção de Perfis FHIR — Baseline R4, compatível com RNDS, SMART v2 | Aceito |
+| [0006](adr-0006-multi-consumer-profile-strategy.pt-BR.md) | Estratégia FHIR Multi-Consumidor — Registry, Projeção Dinâmica, Atomicidade de Bundle | Proposto |
 
 ## Processo
 

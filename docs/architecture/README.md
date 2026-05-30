@@ -30,6 +30,7 @@ one is marked `Superseded by ADR-XXXX`.
 | [0003](adr-0003-branching-and-release-model.md) | Branching & Release Model — Trunk-based Development | Accepted |
 | [0004](adr-0004-did-klever-method.md) | `did:klever` DID Method — Hybrid Classical / Post-Quantum | Proposed |
 | [0005](adr-0005-fhir-profile-selection.md) | FHIR Profile Selection — R4 baseline, RNDS-compatible, SMART v2 | Accepted |
+| [0006](adr-0006-multi-consumer-profile-strategy.md) | Multi-Consumer FHIR Profile Strategy — Registry, Dynamic Projection, Bundle Atomicity | Proposed |
 
 ## Process
 
