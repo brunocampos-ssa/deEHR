@@ -82,8 +82,9 @@ todo perfil FHIR que a plataforma reconhece. Cada entrada registra:
 
 O registry é semeado no lançamento de Phase 1 com: deEHR-canônico (todo
 recurso na §3 da ADR-0005), BR-Core (todo recurso que a ADR-0005 mapeia
-para ele), os perfis de workflow RNDS-Principal ativos sob a ADR-0005, e o
-conjunto de perfis HL7 International Patient Summary (IPS).
+para ele) e os perfis de workflow RNDS-Principal ativos sob a ADR-0005. O
+escopo de adoção do IPS é tratado separadamente — ver a questão em aberto
+nº 7.
 
 Os mapeamentos existentes de conector BR-Core / RNDS-Principal da ADR-0005
 são reexpressos como entradas do Profile Registry sem mudança semântica. As
@@ -167,13 +168,16 @@ transaction`) atomicamente. O pipeline completo:
    âncora é condicional ao sucesso do §4-passo-4; a persistência off-chain só
    é final após a confirmação da transação de âncora.
 
-A âncora de raiz Merkle (em vez de um hash único sobre o Bundle
+A estrutura de raiz Merkle (em vez de um hash único sobre o Bundle
 serializado) é escolhida para que um consumidor possa depois provar
 inclusão de um único recurso em um Bundle sem revelar o resto. Isso
-intersecta a semântica do registry de âncoras da
-[ADR-0002](adr-0002-on-chain-registry-design.pt-BR.md); a ADR-0002 vai
-exigir uma adenda para declarar a forma de âncora de raiz Merkle ao lado da
-forma de âncora por-recurso existente.
+refina a §6 da
+[ADR-0002](adr-0002-on-chain-registry-design.pt-BR.md), que especifica o
+Anchor & Audit Registry como armazenamento de "hashes de integridade de
+Bundles FHIR criptografados pareados com os seus CIDs de IPFS" sem fixar
+a estrutura desse hash. A ADR-0002 vai exigir uma adenda para declarar a
+estrutura de raiz Merkle (sobre hashes canônicos por-recurso + hash de
+metadados do Bundle) como a forma canônica de âncora.
 
 Se o commit da âncora on-chain falhar após a persistência off-chain, a
 plataforma faz retry com backoff limitado (política operacional, não de
@@ -269,9 +273,12 @@ silenciosas.
   Projection Engine + Validator + tooling são um sub-sistema substancial. A
   observação do CTO de "trabalho para um bom engenheiro de dados" é
   precisa; a Phase 1 precisa escopar isso explicitamente.
-- **Adenda à ADR-0002 necessária.** A forma de âncora de raiz Merkle precisa
-  ser declarada na ADR-0002. A ADR-0002 hoje espera âncoras por-recurso; a
-  adenda é não-quebrante mas não-trivial.
+- **Adenda à ADR-0002 necessária.** A estrutura de âncora de raiz Merkle
+  precisa ser declarada na ADR-0002. A §6 da ADR-0002 hoje especifica
+  "hashes de integridade de Bundles FHIR criptografados" sem fixar a
+  estrutura do hash; a adenda refina isso para uma raiz Merkle sobre
+  hashes canônicos por-recurso mais metadados do Bundle. Não-quebrante mas
+  não-trivial.
 - **Mapeamento de perfis entre jurisdições adiado.** Perfis que divergem em
   conteúdo semântico (por exemplo, codificações divergentes de raça/cor)
   estão fora do escopo desta ADR — sinalizados no doc de requisitos e

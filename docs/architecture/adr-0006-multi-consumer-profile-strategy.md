@@ -70,9 +70,9 @@ of every FHIR profile the platform recognizes. Each entry records:
   PR) that admitted the profile.
 
 The registry is seeded at Phase 1 launch with: deEHR-canonical (every
-resource in ADR-0005 §3), BR-Core (every resource ADR-0005 maps to it), the
-RNDS-Principal workflow profiles active under ADR-0005, and the HL7
-International Patient Summary (IPS) profile set.
+resource in ADR-0005 §3), BR-Core (every resource ADR-0005 maps to it), and
+the RNDS-Principal workflow profiles active under ADR-0005. IPS adoption
+scope is tracked separately — see open question #7.
 
 The existing BR-Core / RNDS-Principal connector mappings from ADR-0005 are
 re-expressed as Profile Registry entries with no semantic change. ADR-0005's
@@ -154,12 +154,15 @@ atomically. The full pipeline:
    commit is conditional on §4-step-4 success; off-chain persistence is
    final only after the anchor transaction is confirmed.
 
-The merkle-root anchor (rather than a single hash over the serialized
+The merkle-root structure (rather than a single hash over the serialized
 Bundle) is chosen so that a consumer can later prove inclusion of a single
-resource in a Bundle without disclosing the rest. This intersects
-[ADR-0002](adr-0002-on-chain-registry-design.md)'s anchor-registry
-semantics; ADR-0002 will require an addendum to declare the merkle-root
-anchor form alongside the existing per-resource anchor form.
+resource in a Bundle without disclosing the rest. This refines
+[ADR-0002](adr-0002-on-chain-registry-design.md) §6, which specifies the
+Anchor & Audit Registry as storing "integrity hashes of encrypted FHIR
+bundles paired with their IPFS CIDs" without fixing the structure of that
+hash. ADR-0002 will require an addendum to declare the merkle-root
+structure (over per-resource canonical hashes + Bundle metadata hash) as
+the canonical anchor form.
 
 If the on-chain anchor commit fails after off-chain persistence, the
 platform retries with bounded backoff (operational policy, not ADR-level);
@@ -252,9 +255,11 @@ profile). No silent additions, no silent removals.
   Registry tooling is a substantial sub-system. The CTO's "work for a good
   data engineer" remark is accurate; Phase 1 must scope this work
   explicitly.
-- **ADR-0002 addendum required.** The merkle-root anchor form must be
-  declared in ADR-0002. ADR-0002 currently expects per-resource anchors;
-  the addendum is non-breaking but non-trivial.
+- **ADR-0002 addendum required.** The merkle-root anchor structure must
+  be declared in ADR-0002. ADR-0002 §6 currently specifies "integrity
+  hashes of encrypted FHIR bundles" without fixing the hash structure; the
+  addendum refines this to a merkle root over per-resource canonical
+  hashes plus Bundle metadata. Non-breaking but non-trivial.
 - **Cross-jurisdiction profile mapping deferred.** Profiles that diverge on
   semantic content (e.g., divergent race/ethnicity codings) are out of
   scope for this ADR — flagged in the requirements doc and tracked
