@@ -236,9 +236,10 @@ totalmente revertido.
 - **Segundo investimento de engenharia de dados.** O MPI é um subsistema
   substancial ao lado do engine de projeção da ADR-0006. A Phase 1 **constrói**
   o MPI (a resolução de identidade precisa rodar antes de qualquer escrita
-  persistir) e **arquiteta** o engine de projeção, cuja implementação chega na
-  Phase 2 (ADR-0006 §3); os dois sub-arcos compartilham um único caminho de
-  escrita, mas apenas o MPI é construído na Phase 1.
+  persistir) e **arquiteta** o engine de projeção (o Dynamic Projection Engine,
+  ADR-0006 §3), cuja implementação está prevista para a Phase 2 no roadmap; os
+  dois sub-arcos compartilham um único caminho de escrita, mas apenas o MPI é
+  construído na Phase 1.
 
 ## Alternativas consideradas
 

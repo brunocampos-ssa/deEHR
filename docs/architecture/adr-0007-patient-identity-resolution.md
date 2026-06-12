@@ -215,8 +215,9 @@ preserved — the Bundle is fully committed or fully rolled back.
 - **Second data-engineering investment.** The MPI is a substantial sub-system
   alongside the ADR-0006 projection engine. Phase 1 **builds** the MPI
   (identity resolution must run before any write persists) and **architects**
-  the projection engine, whose implementation lands in Phase 2 (ADR-0006 §3);
-  the two sub-arcs share one write path, but only the MPI is built in Phase 1.
+  the projection engine (the Dynamic Projection Engine, ADR-0006 §3), whose
+  implementation is scheduled for Phase 2 on the roadmap; the two sub-arcs
+  share one write path, but only the MPI is built in Phase 1.
 
 ## Alternatives considered
 
