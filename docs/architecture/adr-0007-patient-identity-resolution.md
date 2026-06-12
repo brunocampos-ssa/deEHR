@@ -279,7 +279,7 @@ Must be resolved before this ADR moves from `Proposed` to `Accepted`:
 - [ADR-0001](adr-0001-identity-and-key-management.md) — identity & key
   management; patient `did:klever` DID and progressive custody.
 - HL7 **FHIR R4 `Patient/$match` operation** —
-  <https://build.fhir.org/patient-operation-match.html>.
+  <https://hl7.org/fhir/R4/patient-operation-match.html>.
 - HL7 **FHIR `match-grade` extension** —
   <https://hl7.org/fhir/R4/valueset-match-grade.html>.
 - **Health Samurai — Master Patient Index and Record Linkage** —

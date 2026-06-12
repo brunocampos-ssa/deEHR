@@ -159,7 +159,7 @@ clinical resources attach to the resolved patient. This **amends ADR-0006 §4**.
 - **Match quality.** Configurable auto-match and no-match thresholds with a
   human-review band between them. Concrete precision/recall targets: TBD in
   Phase 1 against a labelled evaluation set; the pipeline MUST make
-  false-merge (linking two different people) the costlier error to favour,
+  false-merge (linking two different people) the costlier error to avoid,
   since a false merge cross-contaminates clinical histories.
 - **Determinism & auditability of decisions.** Every match decision (auto,
   steward-approved, steward-rejected, merge, unmerge) MUST be reproducible
@@ -254,7 +254,7 @@ assumes a resolved patient identity.
 - [ADR-0001](../architecture/adr-0001-identity-and-key-management.md) —
   identity & key management; patient `did:klever` DID and progressive custody.
 - HL7 **FHIR R4 `Patient/$match` operation** —
-  <https://build.fhir.org/patient-operation-match.html>.
+  <https://hl7.org/fhir/R4/patient-operation-match.html>.
 - HL7 **FHIR `match-grade` extension** —
   <https://hl7.org/fhir/R4/valueset-match-grade.html>.
 - **Health Samurai — Master Patient Index and Record Linkage** —
