@@ -150,6 +150,11 @@ projeção com chave naquele id de recurso são invalidadas. O backend do cache
 O deEHR processa Bundles FHIR do tipo transaction (`Bundle.type =
 transaction`) atomicamente. O pipeline completo:
 
+> **Emendado pela [ADR-0007](adr-0007-patient-identity-resolution.pt-BR.md) §9:**
+> um passo de resolução de identidade (MPI `Patient/$match`) é inserido antes da
+> projeção canônica, e o reference rewriting resolve a referência `Patient` do
+> Bundle para o identificador mestre resolvido pelo MPI.
+
 1. **Validação no nível do Bundle.** Cada `Bundle.entry.resource` é validado
    contra o perfil declarado (via `meta.profile` em cada entry, ou
    defaultado para deEHR-canônico). Qualquer falha de validação rejeita o
