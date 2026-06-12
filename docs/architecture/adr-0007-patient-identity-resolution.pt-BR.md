@@ -234,8 +234,12 @@ totalmente revertido.
   duas identidades on-chain com seus próprios consentimentos e anchors (questão
   em aberto Q6). Este é o risco cross-layer mais agudo introduzido.
 - **Segundo investimento de engenharia de dados.** O MPI é um subsistema
-  substancial sobre o engine de projeção da ADR-0006. O escopo da Phase 1
-  precisa contemplar ambos.
+  substancial ao lado do engine de projeção da ADR-0006. A Phase 1 **constrói**
+  o MPI (a resolução de identidade precisa rodar antes de qualquer escrita
+  persistir) e **arquiteta** o engine de projeção (o Dynamic Projection Engine,
+  ADR-0006 §3), cuja implementação está prevista para a Phase 2 no roadmap; os
+  dois sub-arcos compartilham um único caminho de escrita, mas apenas o MPI é
+  construído na Phase 1.
 
 ## Alternativas consideradas
 
