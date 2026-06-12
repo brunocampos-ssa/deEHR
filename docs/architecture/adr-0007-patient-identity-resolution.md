@@ -213,7 +213,10 @@ preserved — the Bundle is fully committed or fully rolled back.
   with their own consents and anchors (open question Q6). This is the sharpest
   cross-layer risk introduced.
 - **Second data-engineering investment.** The MPI is a substantial sub-system
-  on top of the ADR-0006 projection engine. Phase 1 scope must own both.
+  alongside the ADR-0006 projection engine. Phase 1 **builds** the MPI
+  (identity resolution must run before any write persists) and **architects**
+  the projection engine, whose implementation lands in Phase 2 (ADR-0006 §3);
+  the two sub-arcs share one write path, but only the MPI is built in Phase 1.
 
 ## Alternatives considered
 
