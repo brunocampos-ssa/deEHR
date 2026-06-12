@@ -31,6 +31,7 @@ one is marked `Superseded by ADR-XXXX`.
 | [0004](adr-0004-did-klever-method.md) | `did:klever` DID Method — Hybrid Classical / Post-Quantum | Proposed |
 | [0005](adr-0005-fhir-profile-selection.md) | FHIR Profile Selection — R4 baseline, RNDS-compatible, SMART v2 | Accepted |
 | [0006](adr-0006-multi-consumer-profile-strategy.md) | Multi-Consumer FHIR Profile Strategy — Registry, Dynamic Projection, Bundle Atomicity | Proposed |
+| [0007](adr-0007-patient-identity-resolution.md) | Patient Identity Resolution & Master Patient Index — Match-First Persistence, Golden Record | Proposed |
 
 ## Process
 

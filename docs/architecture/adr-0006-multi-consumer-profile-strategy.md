@@ -136,6 +136,11 @@ not fixed by this ADR.
 deEHR processes FHIR transaction Bundles (`Bundle.type = transaction`)
 atomically. The full pipeline:
 
+> **Amended by [ADR-0007](adr-0007-patient-identity-resolution.md) §9:** an
+> identity-resolution step (MPI `Patient/$match`) is inserted before canonical
+> projection, and reference rewriting resolves the Bundle's `Patient`
+> reference to the MPI-resolved master identifier.
+
 1. **Bundle-level validation.** Each `Bundle.entry.resource` is validated
    against its declared profile (per `meta.profile` on each entry, or
    defaulted to deEHR-canonical). Any single validation failure rejects the
