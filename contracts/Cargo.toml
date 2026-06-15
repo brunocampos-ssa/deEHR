@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "identity-registry",
+    "identity-registry/meta",
     "credential-registry",
     "consent-registry",
     "anchor-registry",

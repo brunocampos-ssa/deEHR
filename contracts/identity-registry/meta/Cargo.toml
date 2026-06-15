@@ -1,0 +1,12 @@
+[package]
+name = "deehr-identity-registry-meta"
+version.workspace = true
+edition = "2021"
+publish = false
+
+[dependencies.deehr-identity-registry]
+path = ".."
+
+[dependencies.klever-sc-meta]
+version = "0.45.0"
+default-features = false
