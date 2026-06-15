@@ -1,0 +1,30 @@
+{
+  "patterns": [
+    {
+      "rule_name": "br_cpf_literal",
+      "regex": "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}",
+      "reminder": "Looks like a real Brazilian CPF. deEHR uses synthetic test data only (no real PHI in the repo), and CPF/CNS must never be written on-chain (public, immutable, un-erasable). Replace with synthetic data."
+    },
+    {
+      "rule_name": "br_cns_literal",
+      "regex": "\\b[12789]\\d{14}\\b",
+      "reminder": "Looks like a Brazilian CNS (Cartao Nacional de Saude, 15 digits). Use synthetic data only; never put a CNS or any identifier on-chain. If this is a hash or timestamp, disregard."
+    },
+    {
+      "rule_name": "private_key_block",
+      "regex": "-----BEGIN [A-Z ]*PRIVATE KEY-----",
+      "reminder": "Embedded private key material. Keys (patient signing keys, ICP-Brasil certs) live in an HSM/KMS and must never be committed, logged, or exported. Load from the secret manager."
+    },
+    {
+      "rule_name": "key_export_or_seed",
+      "substrings": ["mnemonic", "seedPhrase", "seed_phrase", "ExportPrivate", "exportPrivateKey"],
+      "reminder": "Possible key export / seed handling. Custodied keys must never leave the HSM boundary (no export, log, serialize, or return), and progressive custody exposes no seed phrase to patients. Confirm this stays inside custody."
+    },
+    {
+      "rule_name": "contract_panic_path",
+      "regex": "\\.unwrap\\(\\)|\\.expect\\(|panic!\\(|unreachable!\\(",
+      "paths": ["**/contracts/**/*.rs"],
+      "reminder": "panic / unwrap / expect in contract code: a WASM trap on attacker-influenced input is a DoS. Use require! / sc_panic! with a checked condition, or handle the error. Test-only code can disregard."
+    }
+  ]
+}
