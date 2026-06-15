@@ -375,7 +375,9 @@ work**. The four post-quantum questions (PQ signature scheme, PQ KEM,
 multicodec values, PQ-key recovery semantics) are **deferred to a follow-up
 post-quantum verification-method-profile ADR**; none blocks the Ed25519-only
 Phase 1 identity contract ([#27](https://github.com/brunocampos-ssa/deEHR/issues/27)),
-which implements no PQ verification method. No locked sections were changed.
+which implements no PQ verification method. Only the open-questions section
+was restructured (into *Resolved questions*); the Decision, Consequences, and
+Alternatives sections are unchanged.
 With the substantive questions closed, the ADR is promoted from **Proposed**
 to **Accepted** per this entry; future amendments are recorded as additional
 entries here, per the repository's append-only ADR policy.

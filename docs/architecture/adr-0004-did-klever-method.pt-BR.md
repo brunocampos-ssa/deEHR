@@ -418,7 +418,9 @@ multicodec, semântica de recuperação de chave PQ) são **postergadas para um
 ADR de follow-up de perfil de método de verificação pós-quântico**; nenhuma
 bloqueia o contrato de identidade da Fase 1 (apenas Ed25519,
 [#27](https://github.com/brunocampos-ssa/deEHR/issues/27)), que não implementa
-nenhum método de verificação PQ. Nenhuma seção travada foi alterada. Com as
+nenhum método de verificação PQ. Apenas a seção de questões em aberto foi
+reestruturada (em *Questões resolvidas*); as seções de Decisão, Consequências
+e Alternativas permanecem inalteradas. Com as
 questões substantivas encerradas, a ADR é promovida de **Proposto** para
 **Aceito** conforme este registro; emendas futuras são registradas como
 entradas adicionais aqui, conforme a política append-only de ADRs do
