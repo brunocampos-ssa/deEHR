@@ -2,7 +2,7 @@
 
 🌐 **Languages / Idiomas:** **English** · [Português (Brasil)](adr-0004-did-klever-method.pt-BR.md)
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-05-26
 - **Deciders:** deEHR maintainers
 
@@ -299,29 +299,47 @@ for `capabilityInvocation` as well — no DID migration required.
   Phase 0 as more complex than warranted; revisit if cross-chain portability
   becomes a goal.
 
-## Open questions
+## Resolved questions
 
-These must be resolved (or explicitly deferred) before this ADR can move to
-`Accepted`:
+The questions open at proposal are now resolved — each is either decided here
+or explicitly deferred to a follow-up ADR with rationale — promoting this ADR
+to `Accepted`. None of them blocks the Phase 1 (Ed25519-only) identity contract
+([#27](https://github.com/brunocampos-ssa/deEHR/issues/27)), which implements no
+PQ verification method.
 
-- **Which PQ signature scheme to standardise on first** — ML-DSA-65 vs
-  Falcon-512 vs an Ed25519 / ML-DSA hybrid composite. Defer to a follow-up
-  ADR after evaluating the Rust / WASM library landscape and current CNSA
-  2.0 / RNDS guidance.
-- **Which PQ KEM** — ML-KEM-768 is the default candidate, subject to the
-  same library review.
+- **Universal-resolver driver hosting.** Decided: **build internally for
+  Phase 1.** deEHR ships its own `did:klever` resolver driver to keep the MVP
+  self-contained and under deEHR's control; contributing it upstream to the
+  universal-resolver project (for discoverability and more eyes) is revisited
+  after Phase 1, once the driver is stable.
+- **Pairwise-DID UX.** Decided: **defer surfacing to Phase 2.** The method
+  already permits multiple `did:klever` DIDs per holder — each is its own
+  Klever account — so no method change is needed to add pairwise DIDs later.
+  Phase 1 surfaces a single DID per patient to keep onboarding and custody
+  simple; the product cost of multi-DID UX is weighed when it is surfaced.
+- **DID Document caching policy.** Decided: **defer to the resolver /
+  off-chain indexer work.** TTLs and invalidation triggers are a property of
+  the resolver and the ADR-0002 indexer, not of the DID method; they are
+  settled when that component is built in Phase 1.
+
+### Deferred to a follow-up ADR (post-quantum verification-method profile)
+
+The post-quantum specifics are deferred to a dedicated follow-up ADR, to be
+written after evaluating the Rust / WASM PQ library landscape and current
+CNSA 2.0 / RNDS guidance. The crypto-agility design (§7) ensures that adding
+them later requires **no revision to the DID method itself** — only the
+follow-up ADR plus Identity Registry support for the PQ commitment fields
+already specified in §4.
+
+- **PQ signature scheme** — ML-DSA-65 vs Falcon-512 vs an Ed25519 / ML-DSA
+  hybrid composite.
+- **PQ KEM** — ML-KEM-768 is the default candidate, subject to the same
+  library review.
 - **Specific multicodec values** — pin codes for the chosen scheme(s) once
   finalised in the multiformats / W3C DID-extensions registries.
-- **Universal-resolver driver hosting** — build internally for Phase 1, or
-  contribute upstream to the universal-resolver project for discoverability
-  and more eyes on the code.
-- **Pairwise-DID UX** — surface multiple-DID-per-holder in Phase 1, or
-  defer.
-- **Recovery semantics for PQ keys** — must the recovery multisig also hold
-  PQ guardian keys, or is a single classical recovery sufficient to rotate
-  the PQ key? Trade-off between attack surface and recovery operability.
-- **DID Document caching policy** — TTLs and invalidation triggers; relates
-  to the off-chain indexer story in ADR-0002.
+- **Recovery semantics for PQ keys** — whether the recovery multisig must also
+  hold PQ guardian keys, or a single classical recovery suffices to rotate the
+  PQ key (attack-surface vs recovery-operability trade-off).
 
 ## References
 
@@ -344,3 +362,20 @@ These must be resolved (or explicitly deferred) before this ADR can move to
   Management — Progressive Custody.
 - [ADR-0002](adr-0002-on-chain-registry-design.md) — On-chain Registry
   Design.
+
+## Addenda
+
+### 2026-06-15 — Open questions resolved; promoted to Accepted
+
+ADR-0004 originally landed as **Proposed** pending seven open questions. They
+are now resolved (see *Resolved questions*): the universal-resolver driver is
+**built internally for Phase 1**, pairwise-DID UX is **deferred to Phase 2**,
+and DID-Document caching is **deferred to the resolver / off-chain indexer
+work**. The four post-quantum questions (PQ signature scheme, PQ KEM,
+multicodec values, PQ-key recovery semantics) are **deferred to a follow-up
+post-quantum verification-method-profile ADR**; none blocks the Ed25519-only
+Phase 1 identity contract ([#27](https://github.com/brunocampos-ssa/deEHR/issues/27)),
+which implements no PQ verification method. No locked sections were changed.
+With the substantive questions closed, the ADR is promoted from **Proposed**
+to **Accepted** per this entry; future amendments are recorded as additional
+entries here, per the repository's append-only ADR policy.
