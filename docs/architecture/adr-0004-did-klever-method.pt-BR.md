@@ -6,7 +6,7 @@
 
 ---
 
-- **Status:** Proposto
+- **Status:** Aceito
 - **Data:** 2026-05-26
 - **Decisores:** mantenedores da deEHR
 
@@ -336,32 +336,50 @@ necessidade de migração de DID.
   lote. Rejeitada para a Fase 0 por ser mais complexa do que justifica;
   revisitar se a portabilidade cross-chain virar objetivo.
 
-## Questões em aberto
+## Questões resolvidas
 
-Estas precisam ser resolvidas (ou explicitamente postergadas) antes
-que este ADR possa avançar para `Aceito`:
+As questões em aberto na proposta estão agora resolvidas — cada uma é
+decidida aqui ou explicitamente postergada para um ADR de follow-up com
+justificativa — promovendo este ADR a `Aceito`. Nenhuma delas bloqueia o
+contrato de identidade da Fase 1 (apenas Ed25519,
+[#27](https://github.com/brunocampos-ssa/deEHR/issues/27)), que não implementa
+nenhum método de verificação PQ.
 
-- **Qual esquema de assinatura PQ adotar primeiro** — ML-DSA-65 vs
-  Falcon-512 vs um composto híbrido Ed25519 / ML-DSA. Posterga para um
-  ADR de follow-up após avaliação do cenário de bibliotecas Rust /
-  WASM e da orientação atual CNSA 2.0 / RNDS.
-- **Qual KEM PQ** — ML-KEM-768 é o candidato padrão, sujeito à mesma
-  revisão de biblioteca.
+- **Hospedagem do driver do universal-resolver.** Decidido: **construir
+  internamente para a Fase 1.** A deEHR entrega seu próprio driver de
+  resolução `did:klever` para manter o MVP autocontido e sob seu controle;
+  contribuir upstream ao projeto universal-resolver (descoberta e mais olhos)
+  é reavaliado após a Fase 1, quando o driver estiver estável.
+- **UX de DIDs pairwise.** Decidido: **postergar a exposição para a Fase 2.**
+  O método já permite múltiplos DIDs `did:klever` por holder — cada um é sua
+  própria conta Klever — então nenhuma mudança no método é necessária para
+  adicionar DIDs pairwise depois. A Fase 1 expõe um único DID por paciente
+  para manter onboarding e custódia simples.
+- **Política de cache de DID Document.** Decidido: **postergar para o trabalho
+  de resolver / indexador off-chain.** TTLs e gatilhos de invalidação são uma
+  propriedade do resolver e do indexador da ADR-0002, não do método DID; são
+  definidos quando esse componente for construído na Fase 1.
+
+### Postergado para um ADR de follow-up (perfil de método de verificação pós-quântico)
+
+As especificidades pós-quânticas são postergadas para um ADR de follow-up
+dedicado, a ser escrito após avaliar o cenário de bibliotecas PQ Rust / WASM
+e a orientação atual CNSA 2.0 / RNDS. O design de cripto-agilidade (§7)
+garante que adicioná-las depois **não exige revisão do método DID em si** —
+apenas o ADR de follow-up mais o suporte do Identity Registry aos campos de
+commitment PQ já especificados no §4.
+
+- **Esquema de assinatura PQ** — ML-DSA-65 vs Falcon-512 vs um composto
+  híbrido Ed25519 / ML-DSA.
+- **KEM PQ** — ML-KEM-768 é o candidato padrão, sujeito à mesma revisão de
+  biblioteca.
 - **Valores específicos de multicodec** — fixar os códigos para o(s)
-  esquema(s) escolhido(s) assim que finalizados nos registries
-  multiformats / W3C DID-extensions.
-- **Hospedagem do driver do universal-resolver** — construir
-  internamente para a Fase 1 ou contribuir upstream para o projeto
-  universal-resolver para descoberta e mais olhos no código.
-- **UX de DIDs pairwise** — expor múltiplos-DIDs-por-holder na Fase 1
-  ou postergar.
-- **Semântica de recuperação para chaves PQ** — o multisig de
-  recuperação também precisa portar chaves PQ de guardião, ou uma
-  recuperação clássica única é suficiente para rotacionar a chave PQ?
-  Trade-off entre superfície de ataque e operabilidade de recuperação.
-- **Política de cache de DID Document** — TTLs e gatilhos de
-  invalidação; relaciona-se com a história do indexador off-chain da
-  ADR-0002.
+  esquema(s) escolhido(s) assim que finalizados nos registries multiformats /
+  W3C DID-extensions.
+- **Semântica de recuperação para chaves PQ** — se o multisig de recuperação
+  também precisa portar chaves PQ de guardião, ou se uma recuperação clássica
+  única basta para rotacionar a chave PQ (trade-off superfície-de-ataque vs
+  operabilidade de recuperação).
 
 ## Referências
 
@@ -385,3 +403,25 @@ que este ADR possa avançar para `Aceito`:
   e Gestão de Chaves — Custódia Progressiva.
 - [ADR-0002](adr-0002-on-chain-registry-design.pt-BR.md) — Design dos
   Registries On-chain.
+
+## Adendos
+
+### 2026-06-15 — Questões em aberto resolvidas; promovido a Aceito
+
+A ADR-0004 originalmente entrou como **Proposto** com sete questões em aberto.
+Elas estão agora resolvidas (ver *Questões resolvidas*): o driver do
+universal-resolver é **construído internamente na Fase 1**, a UX de DIDs
+pairwise é **postergada para a Fase 2**, e o cache de DID Document é
+**postergado para o trabalho de resolver / indexador off-chain**. As quatro
+questões pós-quânticas (esquema de assinatura PQ, KEM PQ, valores de
+multicodec, semântica de recuperação de chave PQ) são **postergadas para um
+ADR de follow-up de perfil de método de verificação pós-quântico**; nenhuma
+bloqueia o contrato de identidade da Fase 1 (apenas Ed25519,
+[#27](https://github.com/brunocampos-ssa/deEHR/issues/27)), que não implementa
+nenhum método de verificação PQ. Apenas a seção de questões em aberto foi
+reestruturada (em *Questões resolvidas*); as seções de Decisão, Consequências
+e Alternativas permanecem inalteradas. Com as
+questões substantivas encerradas, a ADR é promovida de **Proposto** para
+**Aceito** conforme este registro; emendas futuras são registradas como
+entradas adicionais aqui, conforme a política append-only de ADRs do
+repositório.
