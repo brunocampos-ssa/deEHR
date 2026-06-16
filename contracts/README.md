@@ -18,22 +18,27 @@ The on-chain layer stores **proofs only — never PHI** (see
 
 ## Status
 
-**Skeleton only** (Phase 0). Each crate has a minimal `lib.rs` that documents
-intent; the `klever-vm-sdk-rs` integration is intentionally deferred until the
-ADR-0002 open questions ([#8](https://github.com/brunocampos-ssa/deEHR/issues/8))
-are resolved — specifically Klever KVM upgradeability, cross-contract call
-semantics, the fee/event model, and the SDK contract-macro pattern.
+| Crate | Status |
+| --- | --- |
+| [`identity-registry/`](identity-registry/) | **Implemented** (Phase 1, #27) — `klever-sc` wired; builds to WASM; tested. See its [README](identity-registry/README.md). |
+| `credential-registry/` | Skeleton |
+| `consent-registry/` | Skeleton |
+| `anchor-registry/` | Skeleton |
+
+The skeleton crates carry a minimal `lib.rs` documenting intent; their
+`klever-sc` integration lands with their respective Phase 1 issues.
 
 ## Building
 
-Once the SDK is wired, contracts will build to WASM with:
+Contracts build to WASM with the Klever SDK build tool (`ksc`):
 
 ```bash
 cd contracts
-cargo build --release --target wasm32-unknown-unknown
+ksc all build --path identity-registry   # build one contract
+cargo test -p deehr-identity-registry     # run its tests (build first)
 ```
 
-Until then, `cargo check` validates the workspace structure.
+`cargo check --workspace` validates the workspace without producing WASM.
 
 ## License
 

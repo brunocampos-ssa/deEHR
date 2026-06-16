@@ -1,13 +1,23 @@
 [package]
 name = "deehr-identity-registry"
-description = "deEHR Identity / DID Registry — Klever KVM smart contract (skeleton)"
+description = "deEHR Identity / DID Registry — Klever KVM smart contract"
 version.workspace = true
-edition.workspace = true
+edition = "2021"
 license.workspace = true
 authors.workspace = true
 repository.workspace = true
 publish.workspace = true
 
-# klever-vm-sdk-rs to be added once contract wiring is verified
-# (see issue #8 — ADR-0002 open questions).
-[dependencies]
+[lib]
+path = "src/lib.rs"
+
+[dependencies.klever-sc]
+version = "0.45.0"
+
+[dev-dependencies.klever-sc-scenario]
+version = "0.45.0"
+
+[dev-dependencies.ed25519-dalek]
+version = "2"
+default-features = false
+features = ["std"]
