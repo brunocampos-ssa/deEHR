@@ -90,6 +90,24 @@ fn owner_did() -> ManagedAddress<DebugApi> {
     ManagedAddress::from(&OWNER.eval_to_array())
 }
 
+/// Assert the call succeeded and emitted a klever_sc event whose identifier is
+/// `identifier` (the event name is encoded as the log's first topic), and return
+/// that event's topics so the caller can check the indexed values too.
+fn expect_event(result: TxResult, identifier: &[u8]) -> Vec<Vec<u8>> {
+    result.assert_ok();
+    result
+        .result_logs
+        .into_iter()
+        .find(|log| log.topics.first().map(Vec::as_slice) == Some(identifier))
+        .unwrap_or_else(|| {
+            panic!(
+                "expected event {:?} to be emitted",
+                core::str::from_utf8(identifier).unwrap_or("<binary>")
+            )
+        })
+        .topics
+}
+
 // ---------------------------------------------------------------------------
 // Happy-path lifecycle
 // ---------------------------------------------------------------------------
@@ -110,9 +128,18 @@ fn full_lifecycle_register_update_deactivate() {
         .to_bytes();
 
     // register (with proof-of-possession of the #klv-1 key)
-    world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
-        sc.register_did(mba(&doc1), mba(&pk1), mba(&reg_sig));
-    });
+    world.whitebox_call_check(
+        &contract,
+        ScCallStep::new().from(OWNER_EXPR),
+        |sc| {
+            sc.register_did(mba(&doc1), mba(&pk1), mba(&reg_sig));
+        },
+        |tx| {
+            let topics = expect_event(tx, b"didRegistered");
+            assert_eq!(topics[1], did_bytes.to_vec(), "didRegistered: did topic");
+            assert_eq!(topics[2], doc1.to_vec(), "didRegistered: doc_hash topic");
+        },
+    );
 
     world.whitebox_query(&contract, |sc| {
         let rec = sc.resolve_did(owner_did());
@@ -129,9 +156,18 @@ fn full_lifecycle_register_update_deactivate() {
     let sig = sk1
         .sign(&update_message(&sc_bytes, &did_bytes, &doc2, &pk2, 0))
         .to_bytes();
-    world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
-        sc.update_did(mba(&doc2), mba(&pk2), mba(&sig));
-    });
+    world.whitebox_call_check(
+        &contract,
+        ScCallStep::new().from(OWNER_EXPR),
+        |sc| {
+            sc.update_did(mba(&doc2), mba(&pk2), mba(&sig));
+        },
+        |tx| {
+            let topics = expect_event(tx, b"didUpdated");
+            assert_eq!(topics[1], did_bytes.to_vec(), "didUpdated: did topic");
+            assert_eq!(topics[2], doc2.to_vec(), "didUpdated: doc_hash topic");
+        },
+    );
 
     world.whitebox_query(&contract, |sc| {
         let rec = sc.resolve_did(owner_did());
@@ -148,9 +184,17 @@ fn full_lifecycle_register_update_deactivate() {
     let sig = sk2
         .sign(&deactivate_message(&sc_bytes, &did_bytes, 1))
         .to_bytes();
-    world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
-        sc.deactivate_did(mba(&sig));
-    });
+    world.whitebox_call_check(
+        &contract,
+        ScCallStep::new().from(OWNER_EXPR),
+        |sc| {
+            sc.deactivate_did(mba(&sig));
+        },
+        |tx| {
+            let topics = expect_event(tx, b"didDeactivated");
+            assert_eq!(topics[1], did_bytes.to_vec(), "didDeactivated: did topic");
+        },
+    );
 
     world.whitebox_query(&contract, |sc| {
         let rec = sc.resolve_did(owner_did());
@@ -461,4 +505,76 @@ fn update_true_noop_is_rejected() {
     world.whitebox_query(&contract, |sc| {
         assert_eq!(sc.resolve_did(owner_did()).nonce, 0);
     });
+}
+
+// ---------------------------------------------------------------------------
+// Cross-deployment replay (instance binding — audit M-1)
+// ---------------------------------------------------------------------------
+
+const SC_B_ADDR: &str = "sc:identity-b";
+const SC_B: TestSCAddress = TestSCAddress::new("identity-b");
+const DEPLOYER_B_EXPR: &str = "address:deployer-b";
+
+/// A signature produced for one deployment must be rejected on another. The
+/// contract binds its own address into every signed message (audit M-1), so the
+/// same PoP signature cannot be replayed across two contract instances even with
+/// the same account, key and nonce — e.g. a signature captured on testnet cannot
+/// be replayed on mainnet.
+#[test]
+fn replay_across_deployments_fails() {
+    let mut world = world();
+    let contract_a = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
+    let contract_b = WhiteboxContract::new(SC_B_ADDR, deehr_identity_registry::contract_obj);
+    let code = world.code_expression(CODE_PATH);
+
+    // Two independent deployments at distinct addresses (each its deployer's
+    // first deploy — mirrors the proven single-deploy nonce/new_address pattern).
+    world.set_state_step(
+        SetStateStep::new()
+            .put_account(OWNER_EXPR, Account::new().nonce(1))
+            .put_account(DEPLOYER_B_EXPR, Account::new().nonce(1))
+            .new_address(OWNER_EXPR, 2, SC_ADDR)
+            .new_address(DEPLOYER_B_EXPR, 2, SC_B_ADDR),
+    );
+    world.whitebox_deploy(
+        &contract_a,
+        ScDeployStep::new().from(OWNER_EXPR).code(code.clone()),
+        |sc| sc.init(),
+    );
+    world.whitebox_deploy(
+        &contract_b,
+        ScDeployStep::new().from(DEPLOYER_B_EXPR).code(code),
+        |sc| sc.init(),
+    );
+
+    let did_bytes = OWNER.eval_to_array();
+    let sc_a_bytes = SC.eval_to_array();
+    let sc_b_bytes = SC_B.eval_to_array();
+    assert_ne!(sc_a_bytes, sc_b_bytes, "deployments must have distinct addresses");
+
+    let sk = SigningKey::from_bytes(&[11u8; 32]);
+    let pk = sk.verifying_key().to_bytes();
+    let doc = [0xA1u8; 32];
+
+    // Proof-of-possession signature bound to SC-A's address.
+    let sig_for_a = sk
+        .sign(&register_message(&sc_a_bytes, &did_bytes, &doc, &pk))
+        .to_bytes();
+
+    // Sanity check: it is accepted on SC-A.
+    world.whitebox_call(&contract_a, ScCallStep::new().from(OWNER_EXPR), |sc| {
+        sc.register_did(mba(&doc), mba(&pk), mba(&sig_for_a));
+    });
+
+    // The SAME signature, replayed verbatim on SC-B (a different address), must be
+    // rejected: SC-B rebuilds the signed message with its own address, so the
+    // signature no longer matches.
+    world.whitebox_call_check(
+        &contract_b,
+        ScCallStep::new()
+            .from(OWNER_EXPR)
+            .expect(TxExpect::err("62", "str:invalid signature")),
+        |sc| sc.register_did(mba(&doc), mba(&pk), mba(&sig_for_a)),
+        |r| assert_ne!(r.result_status, 0, "cross-deployment replay must fail"),
+    );
 }
