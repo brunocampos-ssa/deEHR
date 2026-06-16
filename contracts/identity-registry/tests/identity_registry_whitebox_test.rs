@@ -269,7 +269,7 @@ fn replay_of_old_update_signature_fails() {
         sc.register_did(mba(&[0xA1u8; 32]), mba(&pk1), mba(&reg_sig));
     });
 
-    // First update (nonce 0) — valid, advances nonce to 1.
+    // First update (nonce 0) — valid, rotates key to pk2 and advances nonce to 1.
     let sk2 = SigningKey::from_bytes(&[22u8; 32]);
     let pk2 = sk2.verifying_key().to_bytes();
     let doc2 = [0xB2u8; 32];
@@ -280,8 +280,24 @@ fn replay_of_old_update_signature_fails() {
         sc.update_did(mba(&doc2), mba(&pk2), mba(&sig0));
     });
 
-    // Replay the SAME (nonce-0) signature — record nonce is now 1, so the
-    // signed message no longer matches and verification must fail.
+    // Intervening real update (nonce 1, signed by the now-current key sk2) so the
+    // record moves to (doc3, pk3). Without this, replaying sig0's exact (doc2,
+    // pk2) args would simply be a no-op and get rejected by the no-op guard
+    // before the signature check — here we exercise genuine nonce-replay defense.
+    let sk3 = SigningKey::from_bytes(&[33u8; 32]);
+    let pk3 = sk3.verifying_key().to_bytes();
+    let doc3 = [0xC3u8; 32];
+    let sig1 = sk2
+        .sign(&update_message(&sc_bytes, &did_bytes, &doc3, &pk3, 1))
+        .to_bytes();
+    world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
+        sc.update_did(mba(&doc3), mba(&pk3), mba(&sig1));
+    });
+
+    // Replay the SAME (nonce-0) signature — its args (doc2, pk2) now differ from
+    // the current record (doc3, pk3), so it clears the no-op guard, but the
+    // record nonce is now 2, so the signed message no longer matches and
+    // verification must fail.
     world.whitebox_call_check(
         &contract,
         ScCallStep::new()
@@ -365,4 +381,84 @@ fn register_wrong_pop_signature_fails() {
         |sc| sc.register_did(mba(&doc), mba(&pk), mba(&bad_pop)),
         |_| {},
     );
+}
+
+// ---------------------------------------------------------------------------
+// No-op guard (updateDid)
+// ---------------------------------------------------------------------------
+
+/// A doc-only patch (key unchanged) is allowed — updateDid is the only way to
+/// rotate the document hash — and must NOT append a keyHistory entry.
+#[test]
+fn update_doc_only_keeps_key_and_skips_history() {
+    let mut world = deploy();
+    let contract = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
+    let did_bytes = OWNER.eval_to_array();
+    let sc_bytes = SC.eval_to_array();
+
+    let sk1 = SigningKey::from_bytes(&[11u8; 32]);
+    let pk1 = sk1.verifying_key().to_bytes();
+    let doc1 = [0xA1u8; 32];
+    let reg_sig = sk1
+        .sign(&register_message(&sc_bytes, &did_bytes, &doc1, &pk1))
+        .to_bytes();
+    world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
+        sc.register_did(mba(&doc1), mba(&pk1), mba(&reg_sig));
+    });
+
+    // Patch the doc hash only — same key (pk1), signed by the current key.
+    let doc2 = [0xB2u8; 32];
+    let sig = sk1
+        .sign(&update_message(&sc_bytes, &did_bytes, &doc2, &pk1, 0))
+        .to_bytes();
+    world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
+        sc.update_did(mba(&doc2), mba(&pk1), mba(&sig));
+    });
+
+    world.whitebox_query(&contract, |sc| {
+        let rec = sc.resolve_did(owner_did());
+        assert_eq!(rec.nonce, 1);
+        assert_eq!(rec.doc_hash.to_byte_array(), doc2);
+        assert_eq!(rec.primary_key.to_byte_array(), pk1);
+        // key unchanged -> no rotation recorded
+        assert_eq!(sc.key_history(&owner_did()).len(), 0);
+    });
+}
+
+/// An update that changes neither the doc hash nor the key is rejected before
+/// the signature check (cheap guard first), so it cannot consume a nonce.
+#[test]
+fn update_true_noop_is_rejected() {
+    let mut world = deploy();
+    let contract = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
+    let did_bytes = OWNER.eval_to_array();
+    let sc_bytes = SC.eval_to_array();
+
+    let sk1 = SigningKey::from_bytes(&[11u8; 32]);
+    let pk1 = sk1.verifying_key().to_bytes();
+    let doc1 = [0xA1u8; 32];
+    let reg_sig = sk1
+        .sign(&register_message(&sc_bytes, &did_bytes, &doc1, &pk1))
+        .to_bytes();
+    world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
+        sc.register_did(mba(&doc1), mba(&pk1), mba(&reg_sig));
+    });
+
+    // Re-submit the exact current state (doc1, pk1) — a true no-op.
+    let sig = sk1
+        .sign(&update_message(&sc_bytes, &did_bytes, &doc1, &pk1, 0))
+        .to_bytes();
+    world.whitebox_call_check(
+        &contract,
+        ScCallStep::new()
+            .from(OWNER_EXPR)
+            .expect(TxExpect::user_error("str:no-op update")),
+        |sc| sc.update_did(mba(&doc1), mba(&pk1), mba(&sig)),
+        |_| {},
+    );
+
+    // Nonce must be untouched.
+    world.whitebox_query(&contract, |sc| {
+        assert_eq!(sc.resolve_did(owner_did()).nonce, 0);
+    });
 }

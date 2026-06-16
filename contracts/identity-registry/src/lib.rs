@@ -151,11 +151,16 @@ pub trait IdentityRegistry {
         self.did_record(&did).get()
     }
 
-    /// Patch the DID-Document hash and rotate the `#klv-1` key, under proof of
-    /// control of the *current* primary key. `signature` must be that key's
-    /// Ed25519 signature over
+    /// Patch the DID-Document hash and (optionally) rotate the `#klv-1` key,
+    /// under proof of control of the *current* primary key. `signature` must be
+    /// that key's Ed25519 signature over
     /// `0x01 || sc_address || did || new_doc_hash || new_primary_key || nonce(BE u64)`,
     /// where `nonce` is the record's current nonce.
+    ///
+    /// Passing the current key as `new_primary_key` is a doc-only patch: it
+    /// updates the document hash without recording a key rotation. An update that
+    /// changes neither the hash nor the key is rejected (`no-op update`) so it
+    /// cannot consume a nonce or emit a spurious event.
     #[endpoint(updateDid)]
     fn update_did(
         &self,
@@ -167,6 +172,14 @@ pub trait IdentityRegistry {
         require!(!self.did_record(&did).is_empty(), "unknown DID");
         let mut record = self.did_record(&did).get();
         require!(!record.deactivated, "DID deactivated");
+        // Reject true no-ops (nothing to change): they would consume a nonce and
+        // emit an event for no state change. A doc-only patch (key unchanged) is
+        // still allowed — updateDid is the only way to rotate the document hash.
+        let key_changed = new_primary_key != record.primary_key;
+        require!(
+            key_changed || new_doc_hash != record.doc_hash,
+            "no-op update"
+        );
 
         let message = self.signed_message(
             SIG_DOMAIN_UPDATE,
@@ -183,10 +196,14 @@ pub trait IdentityRegistry {
         );
 
         let now = self.blockchain().get_block_timestamp();
-        self.key_history(&did).push(&KeyRotation {
-            previous_key: record.primary_key,
-            rotated_at: now,
-        });
+        // Only record a rotation entry when the key actually changed, so a
+        // doc-only patch does not pollute keyHistory.
+        if key_changed {
+            self.key_history(&did).push(&KeyRotation {
+                previous_key: record.primary_key,
+                rotated_at: now,
+            });
+        }
         record.doc_hash = new_doc_hash.clone();
         record.primary_key = new_primary_key;
         record.updated_at = now;
