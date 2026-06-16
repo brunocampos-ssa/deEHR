@@ -45,6 +45,17 @@ fn deploy() -> ScenarioWorld {
 
 // ---- signed-message builders (mirror the contract's `signed_message`) ----
 
+fn register_message(sc: &[u8; 32], did: &[u8; 32], doc_hash: &[u8; 32], key: &[u8; 32]) -> Vec<u8> {
+    let mut m = Vec::with_capacity(1 + 32 + 32 + 32 + 32 + 8);
+    m.push(0x00);
+    m.extend_from_slice(sc);
+    m.extend_from_slice(did);
+    m.extend_from_slice(doc_hash);
+    m.extend_from_slice(key);
+    m.extend_from_slice(&0u64.to_be_bytes());
+    m
+}
+
 fn update_message(
     sc: &[u8; 32],
     did: &[u8; 32],
@@ -94,10 +105,13 @@ fn full_lifecycle_register_update_deactivate() {
     let sk1 = SigningKey::from_bytes(&[11u8; 32]);
     let pk1 = sk1.verifying_key().to_bytes();
     let doc1 = [0xA1u8; 32];
+    let reg_sig = sk1
+        .sign(&register_message(&sc_bytes, &did_bytes, &doc1, &pk1))
+        .to_bytes();
 
-    // register
+    // register (with proof-of-possession of the #klv-1 key)
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
-        sc.register_did(mba(&doc1), mba(&pk1));
+        sc.register_did(mba(&doc1), mba(&pk1), mba(&reg_sig));
     });
 
     world.whitebox_query(&contract, |sc| {
@@ -131,7 +145,9 @@ fn full_lifecycle_register_update_deactivate() {
     });
 
     // deactivate: signed by the now-current key (sk2) over nonce 1
-    let sig = sk2.sign(&deactivate_message(&sc_bytes, &did_bytes, 1)).to_bytes();
+    let sig = sk2
+        .sign(&deactivate_message(&sc_bytes, &did_bytes, 1))
+        .to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
         sc.deactivate_did(mba(&sig));
     });
@@ -151,17 +167,25 @@ fn full_lifecycle_register_update_deactivate() {
 fn register_twice_fails() {
     let mut world = deploy();
     let contract = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
-    let pk = SigningKey::from_bytes(&[1u8; 32]).verifying_key().to_bytes();
+    let sc_bytes = SC.eval_to_array();
+    let did_bytes = OWNER.eval_to_array();
+    let sk = SigningKey::from_bytes(&[1u8; 32]);
+    let pk = sk.verifying_key().to_bytes();
     let doc = [0x01u8; 32];
+    let reg_sig = sk
+        .sign(&register_message(&sc_bytes, &did_bytes, &doc, &pk))
+        .to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
-        sc.register_did(mba(&doc), mba(&pk));
+        sc.register_did(mba(&doc), mba(&pk), mba(&reg_sig));
     });
+    // Second register reverts on the is_empty gate (before the PoP check), so the
+    // reused signature is irrelevant.
     world.whitebox_call_check(
         &contract,
         ScCallStep::new()
             .from(OWNER_EXPR)
             .expect(TxExpect::user_error("str:DID already registered")),
-        |sc| sc.register_did(mba(&doc), mba(&pk)),
+        |sc| sc.register_did(mba(&doc), mba(&pk), mba(&reg_sig)),
         |_| {},
     );
 }
@@ -189,14 +213,24 @@ fn update_wrong_signature_fails() {
     let sc_bytes = SC.eval_to_array();
     let sk1 = SigningKey::from_bytes(&[11u8; 32]);
     let pk1 = sk1.verifying_key().to_bytes();
+    let reg_sig = sk1
+        .sign(&register_message(
+            &sc_bytes,
+            &did_bytes,
+            &[0xA1u8; 32],
+            &pk1,
+        ))
+        .to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
-        sc.register_did(mba(&[0xA1u8; 32]), mba(&pk1));
+        sc.register_did(mba(&[0xA1u8; 32]), mba(&pk1), mba(&reg_sig));
     });
 
     // Sign with the WRONG key (sk_other), not the registered primary key.
     let sk_other = SigningKey::from_bytes(&[99u8; 32]);
     let doc2 = [0xB2u8; 32];
-    let pk2 = SigningKey::from_bytes(&[22u8; 32]).verifying_key().to_bytes();
+    let pk2 = SigningKey::from_bytes(&[22u8; 32])
+        .verifying_key()
+        .to_bytes();
     let bad_sig = sk_other
         .sign(&update_message(&sc_bytes, &did_bytes, &doc2, &pk2, 0))
         .to_bytes();
@@ -206,7 +240,12 @@ fn update_wrong_signature_fails() {
             .from(OWNER_EXPR)
             .expect(TxExpect::err("62", "str:invalid signature")),
         |sc| sc.update_did(mba(&doc2), mba(&pk2), mba(&bad_sig)),
-        |r| assert_ne!(r.result_status, 0, "expected signature verification to fail"),
+        |r| {
+            assert_ne!(
+                r.result_status, 0,
+                "expected signature verification to fail"
+            )
+        },
     );
 }
 
@@ -218,8 +257,16 @@ fn replay_of_old_update_signature_fails() {
     let sc_bytes = SC.eval_to_array();
     let sk1 = SigningKey::from_bytes(&[11u8; 32]);
     let pk1 = sk1.verifying_key().to_bytes();
+    let reg_sig = sk1
+        .sign(&register_message(
+            &sc_bytes,
+            &did_bytes,
+            &[0xA1u8; 32],
+            &pk1,
+        ))
+        .to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
-        sc.register_did(mba(&[0xA1u8; 32]), mba(&pk1));
+        sc.register_did(mba(&[0xA1u8; 32]), mba(&pk1), mba(&reg_sig));
     });
 
     // First update (nonce 0) — valid, advances nonce to 1.
@@ -253,18 +300,34 @@ fn update_after_deactivate_fails() {
     let sc_bytes = SC.eval_to_array();
     let sk1 = SigningKey::from_bytes(&[11u8; 32]);
     let pk1 = sk1.verifying_key().to_bytes();
+    let reg_sig = sk1
+        .sign(&register_message(
+            &sc_bytes,
+            &did_bytes,
+            &[0xA1u8; 32],
+            &pk1,
+        ))
+        .to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
-        sc.register_did(mba(&[0xA1u8; 32]), mba(&pk1));
+        sc.register_did(mba(&[0xA1u8; 32]), mba(&pk1), mba(&reg_sig));
     });
 
-    let sig = sk1.sign(&deactivate_message(&sc_bytes, &did_bytes, 0)).to_bytes();
+    let sig = sk1
+        .sign(&deactivate_message(&sc_bytes, &did_bytes, 0))
+        .to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
         sc.deactivate_did(mba(&sig));
     });
 
     // Any update after deactivation is rejected before signature checks.
     let sig2 = sk1
-        .sign(&update_message(&sc_bytes, &did_bytes, &[0xC3u8; 32], &pk1, 1))
+        .sign(&update_message(
+            &sc_bytes,
+            &did_bytes,
+            &[0xC3u8; 32],
+            &pk1,
+            1,
+        ))
         .to_bytes();
     world.whitebox_call_check(
         &contract,
@@ -272,6 +335,34 @@ fn update_after_deactivate_fails() {
             .from(OWNER_EXPR)
             .expect(TxExpect::user_error("str:DID deactivated")),
         |sc| sc.update_did(mba(&[0xC3u8; 32]), mba(&pk1), mba(&sig2)),
+        |_| {},
+    );
+}
+
+#[test]
+fn register_wrong_pop_signature_fails() {
+    let mut world = deploy();
+    let contract = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
+    let sc_bytes = SC.eval_to_array();
+    let did_bytes = OWNER.eval_to_array();
+    let pk = SigningKey::from_bytes(&[5u8; 32])
+        .verifying_key()
+        .to_bytes();
+    let doc = [0xD1u8; 32];
+
+    // Proof-of-possession signed by a DIFFERENT key than `pk` — i.e. the caller
+    // does not control the key it is trying to register. Registration must revert
+    // (audit finding 4.1: no key can be bound without proving possession).
+    let sk_other = SigningKey::from_bytes(&[77u8; 32]);
+    let bad_pop = sk_other
+        .sign(&register_message(&sc_bytes, &did_bytes, &doc, &pk))
+        .to_bytes();
+    world.whitebox_call_check(
+        &contract,
+        ScCallStep::new()
+            .from(OWNER_EXPR)
+            .expect(TxExpect::err("62", "str:invalid signature")),
+        |sc| sc.register_did(mba(&doc), mba(&pk), mba(&bad_pop)),
         |_| {},
     );
 }

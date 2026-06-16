@@ -27,7 +27,8 @@ use klever_sc::derive_imports::*;
 use klever_sc::imports::*;
 
 /// Domain-separation tags for signed operations — bind a signature to one
-/// operation so an `update` signature can never be replayed as a `deactivate`.
+/// operation so a signature for one can never be replayed as another.
+const SIG_DOMAIN_REGISTER: u8 = 0x00;
 const SIG_DOMAIN_UPDATE: u8 = 0x01;
 const SIG_DOMAIN_DEACTIVATE: u8 = 0x02;
 
@@ -96,16 +97,37 @@ pub trait IdentityRegistry {
     // ---- endpoints ----
 
     /// Register a new `did:klever` DID Document for the caller's account.
-    /// The DID's method-specific id is the caller address (ADR-0004 §1), so the
-    /// transaction signature itself authorises this first write.
+    /// The DID's method-specific id is the caller address (ADR-0004 §1).
+    ///
+    /// `signature` is a **proof-of-possession**: the caller must control the
+    /// `#klv-1` private key it is registering. It must be `primary_key`'s Ed25519
+    /// signature over `0x00 || sc_address || did || doc_hash || primary_key ||
+    /// 0u64(BE)` (the record's initial nonce). This stops a DID being registered
+    /// with a key the holder cannot sign with, which would permanently freeze the
+    /// DID's `update`/`deactivate` (both verify against the stored key).
     #[endpoint(registerDid)]
     fn register_did(
         &self,
         doc_hash: ManagedByteArray<Self::Api, 32>,
         primary_key: ManagedByteArray<Self::Api, 32>,
+        signature: ManagedByteArray<Self::Api, 64>,
     ) {
         let did = self.blockchain().get_caller();
         require!(self.did_record(&did).is_empty(), "DID already registered");
+
+        // Proof of possession of the #klv-1 key (verified against the *supplied*
+        // key — there is no stored record yet). Panics/reverts on failure.
+        let message = self.signed_message(
+            SIG_DOMAIN_REGISTER,
+            &did,
+            0,
+            Some((&doc_hash, &primary_key)),
+        );
+        self.crypto().verify_ed25519(
+            primary_key.as_managed_buffer(),
+            &message,
+            signature.as_managed_buffer(),
+        );
 
         let now = self.blockchain().get_block_timestamp();
         self.did_record(&did).set(DidRecord {

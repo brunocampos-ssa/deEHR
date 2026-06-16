@@ -22,15 +22,17 @@ replay nonce, and a deactivation flag.
 A `did:klever` DID's method-specific identifier **is the Klever account address**
 (ADR-0004 §1); the account is its own controller. Every state-changing endpoint
 therefore keys off `get_caller()` — an account can only touch its own DID record.
-`update`/`deactivate` additionally require an Ed25519 signature by the **current**
-primary key, giving proof of `#klv-1` key control independent of whatever account
-submits the transaction (e.g. the custodial Signing & Fee Service, P1.4).
+All three state-changing endpoints additionally require an Ed25519 signature by the
+relevant `#klv-1` key — proof of possession at `register` (the key being
+registered), proof of control of the **current** key at `update`/`deactivate` —
+independent of whatever account submits the transaction (e.g. the custodial
+Signing & Fee Service, P1.4).
 
 ## Endpoints
 
 | Endpoint | Args | Notes |
 | --- | --- | --- |
-| `registerDid` | `doc_hash: bytes32`, `primary_key: bytes32` | First write for the caller's DID; fails if already registered. Authorised by the account's own transaction signature. |
+| `registerDid` | `doc_hash: bytes32`, `primary_key: bytes32`, `signature: bytes64` | First write for the caller's DID; fails if already registered. `signature` is a **proof-of-possession** of `primary_key` (see below), so a DID can't be registered with a key the holder can't sign with. |
 | `resolveDid` *(view)* | `did: Address` → `DidRecord` | Panics for an unknown DID. A deactivated DID returns its tombstone record (`deactivated == true`). |
 | `updateDid` | `new_doc_hash: bytes32`, `new_primary_key: bytes32`, `signature: bytes64` | Rotates the `#klv-1` key and patches the doc hash under signature proof; pushes the old key to history. |
 | `deactivateDid` | `signature: bytes64` | Tombstones the DID under signature proof. The record is **retained** (W3C DID Core: deactivation lives in DID-document metadata, the DID stays resolvable). |
@@ -38,16 +40,19 @@ submits the transaction (e.g. the custodial Signing & Fee Service, P1.4).
 
 ### Signed-message format
 
-`update`/`deactivate` verify the signature against the current primary key over a
-**domain-separated, instance- and nonce-bound** message (big-endian `u64` nonce):
+All three state-changing endpoints verify an Ed25519 signature over a
+**domain-separated, instance- and nonce-bound** message (big-endian `u64` nonce).
+`register` proves possession of the key being registered (verified against the
+*supplied* key); `update`/`deactivate` prove control of the *current* stored key:
 
 ```text
+register:   0x00 || sc_address(32) || did(32) || doc_hash(32) || primary_key(32) || 0u64(8)
 update:     0x01 || sc_address(32) || did(32) || new_doc_hash(32) || new_primary_key(32) || nonce(8)
 deactivate: 0x02 || sc_address(32) || did(32) || nonce(8)
 ```
 
-- **Domain separation** (`0x01` / `0x02`) stops an `update` signature being
-  replayed as a `deactivate`.
+- **Domain separation** (`0x00` / `0x01` / `0x02`) stops a signature for one
+  operation being replayed as another.
 - **Instance binding** — the contract's own address (`sc_address`) is included,
   so a signature is valid only at the deployment it was made for (no replay
   across instances / testnet↔mainnet).
@@ -69,6 +74,8 @@ raw 32-byte buffers, no PHI in topics or data.
 ## Security properties
 
 - **No PHI on-chain** (hashes / keys / status only).
+- **Proof-of-possession on register** — a DID cannot be bound to a key the holder
+  cannot sign with (no permanent self-lockout of rotate/deactivate).
 - **Signature-gated** mutations with **replay protection** (per-record nonce) and
   **domain separation**.
 - **Explicit nonce-overflow guards** — the generated WASM release profile sets
@@ -86,7 +93,8 @@ cargo test -p deehr-identity-registry     # whitebox tests (build first; tests l
 
 The tests (`tests/identity_registry_whitebox_test.rs`) cover the full lifecycle
 plus negative cases — replay, wrong signature, wrong key, unknown DID,
-double-register, update-after-deactivate — using synthetic data only.
+double-register, update-after-deactivate, and register-without-proof-of-possession
+— using synthetic data only.
 
 ## Deploy (testnet, manual)
 

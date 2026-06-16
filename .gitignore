@@ -44,6 +44,12 @@ Thumbs.db
 tmp/
 .cache/
 
+# --- Security audit reports (kept local; SECURITY.md mandates private disclosure) ---
+*-vulnerability-report.md
+*-vulnerability-report.html
+*-vulnerability-report.pdf
+*-vulnerability-report.json
+
 # --- Local infra state ---
 *.tfstate
 *.tfstate.*
