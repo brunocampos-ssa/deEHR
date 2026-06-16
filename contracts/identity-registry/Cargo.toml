@@ -16,3 +16,8 @@ version = "0.45.0"
 
 [dev-dependencies.klever-sc-scenario]
 version = "0.45.0"
+
+[dev-dependencies.ed25519-dalek]
+version = "2"
+default-features = false
+features = ["std"]
