@@ -15,6 +15,7 @@ use klever_sc_scenario::imports::*;
 
 const CODE_PATH: &str = "kleversc:output/deehr-identity-registry.kleversc.json";
 const SC_ADDR: &str = "sc:identity";
+const SC: TestSCAddress = TestSCAddress::new("identity");
 const OWNER_EXPR: &str = "address:owner";
 const OWNER: TestAddress = TestAddress::new("owner");
 
@@ -44,9 +45,16 @@ fn deploy() -> ScenarioWorld {
 
 // ---- signed-message builders (mirror the contract's `signed_message`) ----
 
-fn update_message(did: &[u8; 32], doc_hash: &[u8; 32], key: &[u8; 32], nonce: u64) -> Vec<u8> {
-    let mut m = Vec::with_capacity(1 + 32 + 32 + 32 + 8);
+fn update_message(
+    sc: &[u8; 32],
+    did: &[u8; 32],
+    doc_hash: &[u8; 32],
+    key: &[u8; 32],
+    nonce: u64,
+) -> Vec<u8> {
+    let mut m = Vec::with_capacity(1 + 32 + 32 + 32 + 32 + 8);
     m.push(0x01);
+    m.extend_from_slice(sc);
     m.extend_from_slice(did);
     m.extend_from_slice(doc_hash);
     m.extend_from_slice(key);
@@ -54,9 +62,10 @@ fn update_message(did: &[u8; 32], doc_hash: &[u8; 32], key: &[u8; 32], nonce: u6
     m
 }
 
-fn deactivate_message(did: &[u8; 32], nonce: u64) -> Vec<u8> {
-    let mut m = Vec::with_capacity(1 + 32 + 8);
+fn deactivate_message(sc: &[u8; 32], did: &[u8; 32], nonce: u64) -> Vec<u8> {
+    let mut m = Vec::with_capacity(1 + 32 + 32 + 8);
     m.push(0x02);
+    m.extend_from_slice(sc);
     m.extend_from_slice(did);
     m.extend_from_slice(&nonce.to_be_bytes());
     m
@@ -79,6 +88,7 @@ fn full_lifecycle_register_update_deactivate() {
     let mut world = deploy();
     let contract = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
     let did_bytes = OWNER.eval_to_array();
+    let sc_bytes = SC.eval_to_array();
 
     // Key for the #klv-1 verification method.
     let sk1 = SigningKey::from_bytes(&[11u8; 32]);
@@ -103,7 +113,7 @@ fn full_lifecycle_register_update_deactivate() {
     let pk2 = sk2.verifying_key().to_bytes();
     let doc2 = [0xB2u8; 32];
     let sig = sk1
-        .sign(&update_message(&did_bytes, &doc2, &pk2, 0))
+        .sign(&update_message(&sc_bytes, &did_bytes, &doc2, &pk2, 0))
         .to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
         sc.update_did(mba(&doc2), mba(&pk2), mba(&sig));
@@ -121,7 +131,7 @@ fn full_lifecycle_register_update_deactivate() {
     });
 
     // deactivate: signed by the now-current key (sk2) over nonce 1
-    let sig = sk2.sign(&deactivate_message(&did_bytes, 1)).to_bytes();
+    let sig = sk2.sign(&deactivate_message(&sc_bytes, &did_bytes, 1)).to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
         sc.deactivate_did(mba(&sig));
     });
@@ -176,6 +186,7 @@ fn update_wrong_signature_fails() {
     let mut world = deploy();
     let contract = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
     let did_bytes = OWNER.eval_to_array();
+    let sc_bytes = SC.eval_to_array();
     let sk1 = SigningKey::from_bytes(&[11u8; 32]);
     let pk1 = sk1.verifying_key().to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
@@ -187,7 +198,7 @@ fn update_wrong_signature_fails() {
     let doc2 = [0xB2u8; 32];
     let pk2 = SigningKey::from_bytes(&[22u8; 32]).verifying_key().to_bytes();
     let bad_sig = sk_other
-        .sign(&update_message(&did_bytes, &doc2, &pk2, 0))
+        .sign(&update_message(&sc_bytes, &did_bytes, &doc2, &pk2, 0))
         .to_bytes();
     world.whitebox_call_check(
         &contract,
@@ -204,6 +215,7 @@ fn replay_of_old_update_signature_fails() {
     let mut world = deploy();
     let contract = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
     let did_bytes = OWNER.eval_to_array();
+    let sc_bytes = SC.eval_to_array();
     let sk1 = SigningKey::from_bytes(&[11u8; 32]);
     let pk1 = sk1.verifying_key().to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
@@ -215,7 +227,7 @@ fn replay_of_old_update_signature_fails() {
     let pk2 = sk2.verifying_key().to_bytes();
     let doc2 = [0xB2u8; 32];
     let sig0 = sk1
-        .sign(&update_message(&did_bytes, &doc2, &pk2, 0))
+        .sign(&update_message(&sc_bytes, &did_bytes, &doc2, &pk2, 0))
         .to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
         sc.update_did(mba(&doc2), mba(&pk2), mba(&sig0));
@@ -238,20 +250,21 @@ fn update_after_deactivate_fails() {
     let mut world = deploy();
     let contract = WhiteboxContract::new(SC_ADDR, deehr_identity_registry::contract_obj);
     let did_bytes = OWNER.eval_to_array();
+    let sc_bytes = SC.eval_to_array();
     let sk1 = SigningKey::from_bytes(&[11u8; 32]);
     let pk1 = sk1.verifying_key().to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
         sc.register_did(mba(&[0xA1u8; 32]), mba(&pk1));
     });
 
-    let sig = sk1.sign(&deactivate_message(&did_bytes, 0)).to_bytes();
+    let sig = sk1.sign(&deactivate_message(&sc_bytes, &did_bytes, 0)).to_bytes();
     world.whitebox_call(&contract, ScCallStep::new().from(OWNER_EXPR), |sc| {
         sc.deactivate_did(mba(&sig));
     });
 
     // Any update after deactivation is rejected before signature checks.
     let sig2 = sk1
-        .sign(&update_message(&did_bytes, &[0xC3u8; 32], &pk1, 1))
+        .sign(&update_message(&sc_bytes, &did_bytes, &[0xC3u8; 32], &pk1, 1))
         .to_bytes();
     world.whitebox_call_check(
         &contract,

@@ -39,15 +39,18 @@ submits the transaction (e.g. the custodial Signing & Fee Service, P1.4).
 ### Signed-message format
 
 `update`/`deactivate` verify the signature against the current primary key over a
-**domain-separated, nonce-bound** message (big-endian `u64` nonce):
+**domain-separated, instance- and nonce-bound** message (big-endian `u64` nonce):
 
 ```text
-update:     0x01 || did(32) || new_doc_hash(32) || new_primary_key(32) || nonce(8)
-deactivate: 0x02 || did(32) || nonce(8)
+update:     0x01 || sc_address(32) || did(32) || new_doc_hash(32) || new_primary_key(32) || nonce(8)
+deactivate: 0x02 || sc_address(32) || did(32) || nonce(8)
 ```
 
 - **Domain separation** (`0x01` / `0x02`) stops an `update` signature being
   replayed as a `deactivate`.
+- **Instance binding** — the contract's own address (`sc_address`) is included,
+  so a signature is valid only at the deployment it was made for (no replay
+  across instances / testnet↔mainnet).
 - **Nonce binding** — the record's nonce is included and incremented on every
   state change, so a captured signature cannot be replayed.
 

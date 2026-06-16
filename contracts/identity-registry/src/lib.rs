@@ -132,7 +132,7 @@ pub trait IdentityRegistry {
     /// Patch the DID-Document hash and rotate the `#klv-1` key, under proof of
     /// control of the *current* primary key. `signature` must be that key's
     /// Ed25519 signature over
-    /// `0x01 || did || new_doc_hash || new_primary_key || nonce(BE u64)`,
+    /// `0x01 || sc_address || did || new_doc_hash || new_primary_key || nonce(BE u64)`,
     /// where `nonce` is the record's current nonce.
     #[endpoint(updateDid)]
     fn update_did(
@@ -176,7 +176,7 @@ pub trait IdentityRegistry {
 
     /// Deactivate (tombstone) the caller's DID, under proof of control of the
     /// current primary key. `signature` must sign
-    /// `0x02 || did || nonce(BE u64)`.
+    /// `0x02 || sc_address || did || nonce(BE u64)`.
     #[endpoint(deactivateDid)]
     fn deactivate_did(&self, signature: ManagedByteArray<Self::Api, 64>) {
         let did = self.blockchain().get_caller();
@@ -203,7 +203,12 @@ pub trait IdentityRegistry {
 
     /// Build the canonical, domain-separated message that a state-changing
     /// operation must be signed over. Layout:
-    /// `domain(1) || did(32) [|| doc_hash(32) || primary_key(32)] || nonce(BE 8)`.
+    /// `domain(1) || sc_address(32) || did(32) [|| doc_hash(32) || primary_key(32)] || nonce(BE 8)`.
+    ///
+    /// The contract's own address is bound in so a signature is valid only at
+    /// the deployment it was produced for — a signature captured on one instance
+    /// (e.g. testnet) cannot be replayed on another (e.g. mainnet) even if the
+    /// same account, key and nonce exist there.
     fn signed_message(
         &self,
         domain: u8,
@@ -216,6 +221,8 @@ pub trait IdentityRegistry {
     ) -> ManagedBuffer {
         let mut msg = ManagedBuffer::new();
         msg.append_bytes(&[domain]);
+        let sc_address = self.blockchain().get_sc_address();
+        msg.append(sc_address.as_managed_buffer());
         msg.append(did.as_managed_buffer());
         if let Some((doc_hash, primary_key)) = doc_and_key {
             msg.append(doc_hash.as_managed_buffer());
