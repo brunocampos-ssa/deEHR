@@ -262,9 +262,8 @@ Work on deEHR is tracked publicly on GitHub:
   starting with
   [Phase 0 — Foundations](https://github.com/brunocampos-ssa/deEHR/milestone/1)
   through Phase 5.
-- A public **Projects v2 "deEHR Roadmap" board** (in setup — see
-  [#5](https://github.com/brunocampos-ssa/deEHR/issues/5)) will offer Board
-  and Roadmap timeline views over the same issues once enabled.
+- A public **[Projects v2 "deEHR Roadmap" board](https://github.com/users/brunocampos-ssa/projects/1)**
+  offers Board and Roadmap-timeline views over the same issues.
 - **Architecture decisions** are captured as append-only **ADRs** in
   [`docs/architecture/`](docs/architecture/).
 
