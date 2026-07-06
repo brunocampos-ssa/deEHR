@@ -37,7 +37,8 @@ of the repo is docs/ADRs/scaffolding; the only real code so far is the Rust/WASM
 
 ```text
 contracts/      Rust/WASM Klever smart contracts (workspace) — the only real code today
-  identity-registry/   IMPLEMENTED (Ed25519 did:klever MVP). credential/consent/anchor = skeletons
+  identity-registry/   IMPLEMENTED (Ed25519 did:klever MVP)
+  credential-registry/ consent-registry/ anchor-registry/   skeletons
 services/       Go backend services (auth-server, fhir-gateway, rnds-connector, consent-relayer) — scaffolds
 apps/           patient-web, patient-mobile, provider-portal (later phases) — scaffolds
 packages/ tools/ deploy/   shared libs, tooling, Docker/K8s/Terraform — scaffolds
