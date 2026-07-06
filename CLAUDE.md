@@ -35,7 +35,7 @@ of the repo is docs/ADRs/scaffolding; the only real code so far is the Rust/WASM
 
 ## Repository layout
 
-```
+```text
 contracts/      Rust/WASM Klever smart contracts (workspace) — the only real code today
   identity-registry/   IMPLEMENTED (Ed25519 did:klever MVP). credential/consent/anchor = skeletons
 services/       Go backend services (auth-server, fhir-gateway, rnds-connector, consent-relayer) — scaffolds
