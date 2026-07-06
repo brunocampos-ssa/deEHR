@@ -47,8 +47,9 @@ docs/requirements/ docs/security/   requirements + threat model
 
 ## Build & test (contracts)
 
-Toolchain is installed locally: `ksc` + `koperator` at `~/klever-sdk/`, Rust with
-`wasm32-unknown-unknown` target. (Docker/kubectl/Terraform are NOT installed.)
+Contracts need the Klever SDK (`ksc` / `koperator`, from a Klever SDK release) on your
+`PATH`, plus a Rust toolchain with the `wasm32-unknown-unknown` target. The `deploy/` stack
+(Docker / Kubernetes / Terraform) is only required for the later infrastructure phases.
 
 ```bash
 cd contracts
@@ -58,7 +59,8 @@ cargo check --workspace                      # validate workspace without produc
 ```
 
 Contract source of interest: `contracts/identity-registry/src/lib.rs`. It uses `klever-sc`,
-`#![no_std]`, edition 2024. State-changing endpoints (`registerDid`/`updateDid`/
+`#![no_std]`, edition 2021 (the crate pins `edition = "2021"`, overriding the workspace's
+2024 default). State-changing endpoints (`registerDid`/`updateDid`/
 `deactivateDid`) are Ed25519 signature-gated with domain separation + per-record nonce
 replay protection + SC-address instance binding. Read its
 [README](contracts/identity-registry/README.md) before touching it.
